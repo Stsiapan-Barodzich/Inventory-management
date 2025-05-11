@@ -4,12 +4,9 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV PIP_NO_CACHE_DIR 1
 
-
-
 RUN pip install "poetry==2.1.3"
 
 WORKDIR /app
-
 
 COPY src/ .
 COPY pyproject.toml poetry.lock /app/
@@ -17,8 +14,6 @@ COPY pyproject.toml poetry.lock /app/
 RUN poetry config virtualenvs.create false && \
     poetry install --only main --no-interaction --no-root
 
-
 EXPOSE 8000
-
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 COPY . .
