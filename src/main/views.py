@@ -2,8 +2,8 @@
 from django.contrib.auth.models import User
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Product, ProductStock, Warehouse
-from .serializers import (
+from main.models import Product, ProductStock, Warehouse
+from main.serializers import (
     ProductSerializer,
     ProductStockSerializer,
     UserSerializer,
