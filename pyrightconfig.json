@@ -1,8 +1,0 @@
-{
-    "include": ["src"],
-    "venvPath": "C:/Users/User/AppData/Local/pypoetry/Cache/virtualenvs",
-    "venv": "inventory-management-zyaMxSyl-py3.13",
-    "reportMissingModuleSource": false,
-    "typeCheckingMode": "basic"
-  }
-  
