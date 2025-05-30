@@ -10,24 +10,22 @@ from main.serializers import (
     WarehouseSerializer,
 )
 
-# Create your views here.
 
-
-class WarehouseViewSet(ModelViewSet[Warehouse]):
+class WarehouseViewSet(ModelViewSet):
     queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer
 
 
-class UserViewSet(ModelViewSet[User]):
+class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
-class ProductViewSet(ModelViewSet[Product]):
+class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
 
-class ProductStockViewSet(ModelViewSet[ProductStock]):
+class ProductStockViewSet(ModelViewSet):
     queryset = ProductStock.objects.all()
     serializer_class = ProductStockSerializer
