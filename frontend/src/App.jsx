@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Login from './components/Login.jsx';
 import PrivateRoute from './PrivateRoute.jsx';
 import { useAuth } from './AuthContext';
+import { Navigate } from "react-router-dom";
 
 import WarehouseList from './components/WarehouseComponents/WarehouseList.jsx';
 import WarehouseDetail from './components/WarehouseComponents/WarehouseDetail.jsx';
@@ -32,31 +33,32 @@ function App() {
             <li><Link to="/warehouses">Список складов</Link></li>
             <li><Link to="/products">Список продуктов</Link></li>
             <li><Link to="/users">Список пользователей</Link></li>
-            <li><Link to="/productstocks">Добавить товар на склад</Link></li>
+            <li><Link to="/product-stocks">Добавить товар на склад</Link></li>
             <li><button onClick={logoutUser}>Выйти</button></li>
           </ul>
         </nav>
       )}
 
       <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
 
         <Route path="/warehouses" element={<PrivateRoute><WarehouseList /></PrivateRoute>} />
         <Route path="/warehouses/:id" element={<PrivateRoute><WarehouseDetail /></PrivateRoute>} />
         <Route path="/warehouses/add" element={<PrivateRoute><AddWarehouseForm /></PrivateRoute>} />
-        <Route path="/warehouses/edit/:id" element={<PrivateRoute><EditWarehouseForm /></PrivateRoute>} />
+        <Route path="/warehouses/edit/:id/" element={<PrivateRoute><EditWarehouseForm /></PrivateRoute>} />
 
         <Route path="/products" element={<PrivateRoute><ProductList /></PrivateRoute>} />
         <Route path="/products/:id" element={<PrivateRoute><ProductDetail /></PrivateRoute>} />
         <Route path="/products/add" element={<PrivateRoute><AddProductForm /></PrivateRoute>} />
-        <Route path="/products/edit/:id" element={<PrivateRoute><EditProductForm /></PrivateRoute>} />
+        <Route path="/products/edit/:id/" element={<PrivateRoute><EditProductForm /></PrivateRoute>} />
 
         <Route path="/users" element={<PrivateRoute><UserList /></PrivateRoute>} />
         <Route path="/users/:id" element={<PrivateRoute><UserDetail /></PrivateRoute>} />
         <Route path="/users/add" element={<PrivateRoute><AddUserForm /></PrivateRoute>} />
         <Route path="/users/edit/:id" element={<PrivateRoute><EditUserForm /></PrivateRoute>} />
 
-        <Route path="/productstocks" element={<PrivateRoute><AddProductStockForm /></PrivateRoute>} />
+        <Route path="/product-stocks" element={<PrivateRoute><AddProductStockForm /></PrivateRoute>} />
       </Routes>
     </>
   );
