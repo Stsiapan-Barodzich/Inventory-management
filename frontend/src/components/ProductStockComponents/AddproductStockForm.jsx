@@ -32,12 +32,12 @@ export default function AddProductStockForm() {
     }
 
     const newStock = {
-      warehouse_id: selectedWarehouse,
-      product_id: selectedProduct,
+      warehouse: selectedWarehouse,
+      product: selectedProduct,
       quantity: Number(quantity),
     };
 
-    const res = await fetch("http://localhost:8000/productstocks/", {
+    const res = await fetch("http://localhost:8000/product-stocks/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export default function AddProductStockForm() {
 
     if (res.ok) {
       alert("Товар добавлен на склад!");
-      navigate("/productstocks"); 
+      navigate("/product-stocks"); 
     } else {
       alert("Ошибка при добавлении товара на склад");
     }

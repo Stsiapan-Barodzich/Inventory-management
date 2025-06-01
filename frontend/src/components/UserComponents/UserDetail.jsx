@@ -29,8 +29,11 @@ export default function UserDetail() {
     <div>
       <h2>{user.username}</h2>
       <p>Email: {user.email}</p>
-      <button onClick={() => navigate(`/users/${id}/edit`)}>Редактировать</button>
+      <button onClick={() => navigate(`/users/edit/${id}`)}>Редактировать</button>
       <button onClick={handleDelete}>Удалить</button>
+
+      <br /><br />
+      <button onClick={() => navigate("/users")}>← Список пользователей</button>
     </div>
   );
 }

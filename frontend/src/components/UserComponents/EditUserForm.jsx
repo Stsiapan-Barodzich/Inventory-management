@@ -9,10 +9,16 @@ export default function EditUserForm() {
 
   useEffect(() => {
     fetch(`http://localhost:8000/users/${id}/`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(data => {
-        setUsername(data.username);
-        setEmail(data.email);
+        setUsername(data.username || "");
+        setEmail(data.email || ""); // даже если пустой — окей
+      })
+      .catch(err => {
+        console.error("Ошибка при загрузке пользователя:", err);
       });
   }, [id]);
 

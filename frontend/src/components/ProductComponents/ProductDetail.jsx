@@ -8,27 +8,48 @@ export default function ProductDetail() {
 
   useEffect(() => {
     fetch(`http://localhost:8000/products/${id}/`)
-      .then((res) => res.json())
-      .then(setProduct);
-  }, [id]);
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch product");
+        return res.json();
+      })
+      .then(setProduct)
+      .catch(() => {
+        alert("Ошибка при загрузке продукта");
+        navigate("/products");
+      });
+  }, [id, navigate]);
 
   const handleDelete = async () => {
-    const res = await fetch(`http://localhost:8000/products/${id}/`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
-      alert("Product deleted");
-      navigate("/products");
+    if (window.confirm("Вы уверены, что хотите удалить этот продукт?")) {
+      const res = await fetch(`http://localhost:8000/products/${id}/`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        alert("Продукт удалён");
+        navigate("/products");
+      } else {
+        alert("Ошибка при удалении");
+      }
     }
   };
+
+
+  if (!product) return <p>Загрузка...</p>;
 
   return (
     <div>
       <h2>{product.name}</h2>
-      <p>Price: {product.price}</p>
-      <p>Description: {product.description}</p>
-      <button onClick={() => navigate(`/products/${id}/edit`)}>Edit</button>
-      <button onClick={handleDelete}>Delete</button>
+      <p>Цена: {product.price}</p>
+      <p>Описание: {product.description}</p>
+      <button onClick={() => navigate(`/products/edit/${id}`)}>Редактировать</button>
+      <button
+        onClick={handleDelete}
+        style={{ marginLeft: "10px", backgroundColor: "#ff4d4f", color: "#fff" }}
+      >
+        Удалить
+      </button>
+      <br />
+      <button onClick={() => navigate("/products")}>← Список продуктов</button>
     </div>
   );
 }
