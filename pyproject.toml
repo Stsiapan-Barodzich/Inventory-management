@@ -3,7 +3,7 @@ name = "Inventory_management"
 version = "0.1.0"
 description = "Inventory management"
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "Your Name", email = "you@example.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12,<4"
@@ -20,6 +20,8 @@ dependencies = [
     "pre_commit (>=4.2.0)",
     "mypy (>=0.740)",
     "python-dotenv (>=0.9.9)",
+    "djangorestframework-simplejwt==5.3.1",
+    "django-cors-header==4.7.0",
 ]
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
