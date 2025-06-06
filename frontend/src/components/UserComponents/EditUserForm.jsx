@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuthFetch } from "../../useAuthFetch";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 export default function EditUserForm() {
   const { id } = useParams();
@@ -42,32 +42,38 @@ export default function EditUserForm() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="container fade-in">Loading...</p>;
 
   return (
-    <div>
-      <h2>Edit User</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Username:</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Save</button>
-      </form>
+    <div className="container fade-in">
+      <div className="card">
+        <h2>Edit User</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username:</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email:</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-primary">
+            Save
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

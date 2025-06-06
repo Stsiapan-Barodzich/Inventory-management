@@ -1,8 +1,9 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import Login from './components/Login.jsx';
-import PrivateRoute from './PrivateRoute.jsx';
-import { useAuth } from './AuthContext';
-import { Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './Contexts/AuthContext.jsx';
+import PrivateRoute from './Routes/PrivateRoute.jsx';
+import Layout from './components/SharedComponents/Layout/Layout.jsx';
+import Login from './components/AuthComponents/Login.jsx';
+import Logout from './components/AuthComponents/Logout.jsx';
 
 import WarehouseList from './components/WarehouseComponents/WarehouseList.jsx';
 import WarehouseDetail from './components/WarehouseComponents/WarehouseDetail.jsx';
@@ -20,48 +21,41 @@ import AddUserForm from './components/UserComponents/AddUserForm.jsx';
 import EditUserForm from './components/UserComponents/EditUserForm.jsx';
 
 import AddProductStockForm from './components/ProductStockComponents/AddproductStockForm.jsx';
-import './App.css';
 
 function App() {
-  const { user, logoutUser } = useAuth();
-
   return (
-    <>
-      {user && (
-        <nav>
-          <ul>
-            <li><Link to="/warehouses">Warehouse list</Link></li>
-            <li><Link to="/products">Product list</Link></li>
-            <li><Link to="/users">User list</Link></li>
-            <li><Link to="/product-stocks">Add productstock</Link></li>
-            <li><button onClick={logoutUser}>Logout</button></li>
-          </ul>
-        </nav>
-      )}
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Navigate to="/api/token" replace />} />
+          <Route path="/api/token" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
+          
+          <Route element={<PrivateRoute />}>
+            <Route element={<Layout />}>
+              <Route path="/warehouses" element={<WarehouseList />} />
+              <Route path="/warehouses/:id" element={<WarehouseDetail />} />
+              <Route path="/warehouses/add" element={<AddWarehouseForm />} />
+              <Route path="/warehouses/edit/:id" element={<EditWarehouseForm />} />
 
-      <Routes>
-        <Route path="/" element={<Navigate to="/api/token" replace />} />
-        <Route path="/api/token" element={<Login />} />
-
-        <Route path="/warehouses" element={<PrivateRoute><WarehouseList /></PrivateRoute>} />
-        <Route path="/warehouses/:id" element={<PrivateRoute><WarehouseDetail /></PrivateRoute>} />
-        <Route path="/warehouses/add" element={<PrivateRoute><AddWarehouseForm /></PrivateRoute>} />
-        <Route path="/warehouses/edit/:id/" element={<PrivateRoute><EditWarehouseForm /></PrivateRoute>} />
-
-        <Route path="/products" element={<PrivateRoute><ProductList /></PrivateRoute>} />
-        <Route path="/products/:id" element={<PrivateRoute><ProductDetail /></PrivateRoute>} />
-        <Route path="/products/add" element={<PrivateRoute><AddProductForm /></PrivateRoute>} />
-        <Route path="/products/edit/:id/" element={<PrivateRoute><EditProductForm /></PrivateRoute>} />
-
-        <Route path="/users" element={<PrivateRoute><UserList /></PrivateRoute>} />
-        <Route path="/users/:id" element={<PrivateRoute><UserDetail /></PrivateRoute>} />
-        <Route path="/users/add" element={<PrivateRoute><AddUserForm /></PrivateRoute>} />
-        <Route path="/users/edit/:id" element={<PrivateRoute><EditUserForm /></PrivateRoute>} />
-
-        <Route path="/product-stocks" element={<PrivateRoute><AddProductStockForm /></PrivateRoute>} />
-      </Routes>
-    </>
+              <Route path="/products" element={<ProductList />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/products/add" element={<AddProductForm />} />
+              <Route path="/products/edit/:id" element={<EditProductForm />} />
+              
+              <Route path="/users" element={<UserList />} />
+              <Route path="/users/:id" element={<UserDetail />} />
+              <Route path="/users/add" element={<AddUserForm />} />
+              <Route path="/users/edit/:id" element={<EditUserForm />} />
+              
+              <Route path="/product-stocks" element={<AddProductStockForm />} />
+            </Route>
+          </Route>
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
 export default App;
+

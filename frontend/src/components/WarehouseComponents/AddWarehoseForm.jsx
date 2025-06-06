@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthFetch } from "../../useAuthFetch";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 export default function AddWarehouseForm() {
   const [name, setName] = useState("");
@@ -46,45 +46,52 @@ export default function AddWarehouseForm() {
   };
 
   return (
-    <div>
-      <h2>Add Warehouse</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Location:</label>
-          <textarea
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Users:</label>
-          <select
-            multiple
-            value={selectedUsers}
-            onChange={(e) =>
-              setSelectedUsers(
-                Array.from(e.target.selectedOptions, (option) => Number(option.value))
-              )
-            }
-          >
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.username}
-              </option>
-            ))}
-          </select>
-        </div>
-        <button type="submit">Add</button>
-      </form>
+    <div className="container fade-in">
+      <div className="card">
+        <h2>Add Warehouse</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Name:</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="location">Location:</label>
+            <textarea
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="users">Users:</label>
+            <select
+              id="users"
+              multiple
+              value={selectedUsers}
+              onChange={(e) =>
+                setSelectedUsers(
+                  Array.from(e.target.selectedOptions, (option) => Number(option.value))
+                )
+              }
+            >
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.username}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" className="btn btn-success">
+            Add
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthFetch } from "../../useAuthFetch";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 export default function AddProductStockForm() {
   const [warehouses, setWarehouses] = useState([]);
@@ -57,54 +57,58 @@ export default function AddProductStockForm() {
   };
 
   return (
-    <div>
-      <h2>Add Product Stock</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Warehouse:</label>
-          <select
-            value={selectedWarehouse}
-            onChange={(e) => setSelectedWarehouse(e.target.value)}
-            required
-          >
-            <option value="">-- Choose a warehouse --</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label>Product:</label>
-          <select
-            value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
-            required
-          >
-            <option value="">-- Choose a product --</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label>Quantity:</label>
-          <input
-            type="number"
-            min="0"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            required
-          />
-        </div>
-
-        <button type="submit">Add Product Stock</button>
-      </form>
+    <div className="container fade-in">
+      <div className="card">
+        <h2>Add Product Stock</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="warehouse">Warehouse:</label>
+            <select
+              id="warehouse"
+              value={selectedWarehouse}
+              onChange={(e) => setSelectedWarehouse(e.target.value)}
+              required
+            >
+              <option value="">-- Choose a warehouse --</option>
+              {warehouses.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="product">Product:</label>
+            <select
+              id="product"
+              value={selectedProduct}
+              onChange={(e) => setSelectedProduct(e.target.value)}
+              required
+            >
+              <option value="">-- Choose a product --</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="quantity">Quantity:</label>
+            <input
+              type="number"
+              id="quantity"
+              min="0"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className="btn btn-success">
+            Add Product Stock
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
