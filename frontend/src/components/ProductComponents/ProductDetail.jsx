@@ -1,55 +1,55 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useAuthFetch } from "../../useAuthFetch";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
-    fetch(`http://localhost:8000/products/${id}/`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch product");
-        return res.json();
+    authFetch(`http://localhost:8000/products/${id}/`)
+      .then((data) => {
+        setProduct(data);
       })
-      .then(setProduct)
-      .catch(() => {
-        alert("Ошибка при загрузке продукта");
+      .catch((err) => {
+        alert("Failed to load product");
         navigate("/products");
       });
-  }, [id, navigate]);
+  }, [id, navigate, authFetch]);
 
-  const handleDelete = async () => {
-    if (window.confirm("Вы уверены, что хотите удалить этот продукт?")) {
-      const res = await fetch(`http://localhost:8000/products/${id}/`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        alert("Продукт удалён");
+  const handleDelete = () => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    authFetch(`http://localhost:8000/products/${id}/`, { method: "DELETE" })
+      .then(() => {
+        alert("Product deleted");
         navigate("/products");
-      } else {
-        alert("Ошибка при удалении");
-      }
-    }
+      })
+      .catch(() => {
+        alert("Failed to delete product");
+      });
   };
 
-
-  if (!product) return <p>Загрузка...</p>;
+  if (!product) return <p>Loading...</p>;
 
   return (
-    <div>
+    <div className="container">
       <h2>{product.name}</h2>
-      <p>Цена: {product.price}</p>
-      <p>Описание: {product.description}</p>
-      <button onClick={() => navigate(`/products/edit/${id}`)}>Редактировать</button>
+      <p>Price: {product.price}</p>
+      <p>Description: {product.description}</p>
+
+      <button onClick={() => navigate(`/products/edit/${id}`)}>Edit</button>
       <button
         onClick={handleDelete}
-        style={{ marginLeft: "10px", backgroundColor: "#ff4d4f", color: "#fff" }}
+        style={{ marginLeft: 10, backgroundColor: "#ff4d4f", color: "#fff" }}
       >
-        Удалить
+        Delete
       </button>
+
       <br />
-      <button onClick={() => navigate("/products")}>← Список продуктов</button>
+      <button onClick={() => navigate("/products")}>← Product List</button>
     </div>
   );
 }

@@ -1,30 +1,28 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuthFetch } from "../../useAuthFetch";
 
 export default function EditWarehouseForm() {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(true);
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
-    fetch(`http://localhost:8000/warehouses/${id}/`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch warehouse");
-        return res.json();
-      })
+    authFetch(`http://localhost:8000/warehouses/${id}/`)
       .then((data) => {
         setName(data.name);
         setLocation(data.location);
         setLoading(false);
       })
       .catch((err) => {
-        alert("Ошибка при загрузке склада");
+        console.error("Error fetching warehouse:", err);
+        alert("Error loading warehouse");
         navigate("/warehouses");
       });
-  }, [id, navigate]);
+  }, [id, navigate, authFetch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,30 +32,31 @@ export default function EditWarehouseForm() {
       location,
     };
 
-    const res = await fetch(`http://localhost:8000/warehouses/${id}/`, {
-      method: "PATCH", 
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedWarehouse),
-    });
+    try {
+      await authFetch(`http://localhost:8000/warehouses/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedWarehouse),
+      });
 
-    if (res.ok) {
-      alert("Склад успешно обновлен");
+      alert("Warehouse successfully updated");
       navigate("/warehouses");
-    } else {
-      alert("Ошибка при обновлении склада");
+    } catch (error) {
+      console.error("Error updating warehouse:", error);
+      alert("Error updating warehouse: " + error.message);
     }
   };
 
-  if (loading) return <p>Загрузка...</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div>
-      <h2>Редактировать склад</h2>
+      <h2>Edit Warehouse</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Название:</label>
+          <label>Name:</label>
           <input
             type="text"
             value={name}
@@ -67,14 +66,14 @@ export default function EditWarehouseForm() {
         </div>
 
         <div>
-          <label>Локация:</label>
+          <label>Location:</label>
           <textarea
             value={location}
             onChange={(e) => setLocation(e.target.value)}
           />
         </div>
 
-        <button type="submit">Сохранить</button>
+        <button type="submit">Save</button>
       </form>
     </div>
   );
