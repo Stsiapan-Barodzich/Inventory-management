@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useAuthFetch } from "../../useAuthFetch";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -32,24 +32,26 @@ export default function ProductDetail() {
       });
   };
 
-  if (!product) return <p>Loading...</p>;
+  if (!product) return <p className="container fade-in">Loading...</p>;
 
   return (
-    <div className="container">
-      <h2>{product.name}</h2>
-      <p>Price: {product.price}</p>
-      <p>Description: {product.description}</p>
-
-      <button onClick={() => navigate(`/products/edit/${id}`)}>Edit</button>
-      <button
-        onClick={handleDelete}
-        style={{ marginLeft: 10, backgroundColor: "#ff4d4f", color: "#fff" }}
-      >
-        Delete
-      </button>
-
-      <br />
-      <button onClick={() => navigate("/products")}>← Product List</button>
+    <div className="container fade-in">
+      <div className="card">
+        <h2>{product.name}</h2>
+        <p><strong>Price:</strong> {product.price}</p>
+        <p><strong>Description:</strong> {product.description}</p>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <button className="btn btn-primary" onClick={() => navigate(`/products/edit/${id}`)}>
+            Edit
+          </button>
+          <button className="btn btn-danger" onClick={handleDelete}>
+            Delete
+          </button>
+        </div>
+        <button className="btn btn-primary" onClick={() => navigate("/products")}>
+          ← Product List
+        </button>
+      </div>
     </div>
   );
 }

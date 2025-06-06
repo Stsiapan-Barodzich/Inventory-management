@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuthFetch } from "../../useAuthFetch";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 export default function EditWarehouseForm() {
   const { id } = useParams();
@@ -49,32 +49,36 @@ export default function EditWarehouseForm() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="container fade-in">Loading...</p>;
 
   return (
-    <div>
-      <h2>Edit Warehouse</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name:</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <label>Location:</label>
-          <textarea
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-
-        <button type="submit">Save</button>
-      </form>
+    <div className="container fade-in">
+      <div className="card">
+        <h2>Edit Warehouse</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Name:</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="location">Location:</label>
+            <textarea
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
+          <button type="submit" className="btn btn-primary">
+            Save
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

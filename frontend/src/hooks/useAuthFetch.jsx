@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../Contexts/AuthContext";
 
 export function useAuthFetch() {
   const { authTokens, logout } = useAuth();
@@ -36,8 +36,9 @@ export function useAuthFetch() {
 
       return response;
     },
-    [authTokens, logout] // зависимости для useCallback
+    [authTokens, logout] 
   );
 
   return authFetch;
 }
+

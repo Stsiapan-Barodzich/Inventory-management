@@ -1,0 +1,51 @@
+import { useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../Contexts/AuthContext';
+import {useAuthFetch} from '../../hooks/useAuthFetch';
+
+const Logout = () => {
+  const { setAuthTokens, setIsAuthenticated } = useContext(useAuth);
+  const navigate = useNavigate();
+  const { fetch } = useAuthFetch();
+
+  useEffect(() => {
+    const performLogout = async () => {
+      try {
+        
+        const refreshToken = localStorage.getItem('refreshToken');
+        
+        if (refreshToken) {
+          
+          await fetch('/logout/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+          });
+        }
+
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setAuthTokens(null);
+        setIsAuthenticated(false);
+        
+        navigate('/api/token');
+      } catch (error) {
+        console.error('Logout failed:', error);
+        // В случае ошибки все равно очищаем токены
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        setAuthTokens(null);
+        setIsAuthenticated(false);
+        navigate('/api/token');
+      }
+    };
+
+    performLogout();
+  }, [fetch, navigate, setAuthTokens, setIsAuthenticated]);
+
+  return null; 
+};
+
+export default Logout;

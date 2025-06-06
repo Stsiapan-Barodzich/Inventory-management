@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuthFetch } from "../../useAuthFetch";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 export default function WarehouseDetail() {
   const { id } = useParams();
@@ -48,41 +48,44 @@ export default function WarehouseDetail() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="container fade-in">Loading...</p>;
 
   return (
-    <div>
-      <h2>{warehouse.name}</h2>
-      <p>Location: {warehouse.location}</p>
-
-      <button onClick={() => navigate(`/warehouses/edit/${id}`)}>Edit</button>
-      <button
-        onClick={handleDelete}
-        style={{ marginLeft: "10px", backgroundColor: "#ff4d4f", color: "#fff" }}
-      >
-        Delete
-      </button>
-      <button onClick={fetchProducts}>Show Products</button>
-
-      <br /><br />
-      <button onClick={() => navigate("/warehouses")}>← Back to Warehouses List</button>
-
-      {showProducts && (
-        <div>
-          <h3>Products in Warehouse:</h3>
-          {products.length === 0 ? (
-            <p>No products found in this warehouse</p>
-          ) : (
-            <ul>
-              {products.map((p) => (
-                <li key={p.id || p.product_name}>
-                  {p.product_name} — {p.quantity}
-                </li>
-              ))}
-            </ul>
-          )}
+    <div className="container fade-in">
+      <div className="card">
+        <h2>{warehouse.name}</h2>
+        <p><strong>Location:</strong> {warehouse.location}</p>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <button className="btn btn-primary" onClick={() => navigate(`/warehouses/edit/${id}`)}>
+            Edit
+          </button>
+          <button className="btn btn-danger" onClick={handleDelete}>
+            Delete
+          </button>
+          <button className="btn btn-primary" onClick={fetchProducts}>
+            Show Products
+          </button>
         </div>
-      )}
+        <button className="btn btn-primary" onClick={() => navigate("/warehouses")}>
+          ← Back to Warehouses List
+        </button>
+        {showProducts && (
+          <div>
+            <h3>Products in Warehouse:</h3>
+            {products.length === 0 ? (
+              <p>No products found in this warehouse</p>
+            ) : (
+              <ul>
+                {products.map((p) => (
+                  <li key={p.id || p.product_name}>
+                    {p.product_name} — {p.quantity}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

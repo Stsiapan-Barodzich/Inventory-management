@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuthFetch } from "../../useAuthFetch";
+import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 export default function UserDetail() {
   const { id } = useParams();
@@ -36,21 +36,25 @@ export default function UserDetail() {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="container fade-in">Loading...</div>;
 
   return (
-    <div>
-      <h2>{user.username}</h2>
-      <p>Email: {user.email}</p>
-      <button onClick={() => navigate(`/users/edit/${id}`)}>Edit</button>
-      <button
-        onClick={handleDelete}
-        style={{ marginLeft: "10px", backgroundColor: "#ff4d4f", color: "#fff" }}
-      >
-        Delete
-      </button>
-      <br /><br />
-      <button onClick={() => navigate("/users")}>← User List</button>
+    <div className="container fade-in">
+      <div className="card">
+        <h2>{user.username}</h2>
+        <p><strong>Email:</strong> {user.email}</p>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <button className="btn btn-primary" onClick={() => navigate(`/users/edit/${id}`)}>
+            Edit
+          </button>
+          <button className="btn btn-danger" onClick={handleDelete}>
+            Delete
+          </button>
+        </div>
+        <button className="btn btn-primary" onClick={() => navigate("/users")}>
+          ← User List
+        </button>
+      </div>
     </div>
   );
 }
