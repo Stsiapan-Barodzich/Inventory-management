@@ -25,8 +25,14 @@ class ProductStock(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
 
-    class Meta:
-        unique_together = ("product", "warehouse")
+    def identical_items(self) -> "ProductStock":
+        existing = ProductStock.objects.filter(product=self.product, warehouse=self.warehouse).first()
+        if existing:
+            existing.quantity += self.quantity
+            existing.save()
+            self.delete()
+            return existing
+        return self
 
     def __str__(self) -> str:
         return f"{self.product.name} - {self.warehouse.name} ({self.quantity})"

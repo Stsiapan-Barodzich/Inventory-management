@@ -1,7 +1,4 @@
-from collections.abc import Sequence
-from typing import Any
-
-from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import action
@@ -32,7 +29,7 @@ class WarehouseViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=["get"])
-    def products(self, request: Request) -> Response:
+    def products(self, request: Request, pk: str | None = None) -> Response:
         warehouse = self.get_object()
         product_stocks = ProductStock.objects.filter(warehouse=warehouse)
         data = [{"product_name": ps.product.name, "quantity": ps.quantity} for ps in product_stocks]
@@ -44,6 +41,30 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     authentication_classes = (JWTAuthentication,)
     permission_classes = [IsAuthenticated]
+
+    def create(self, request: Request, *args: str, **kwargs: str) -> Response:
+
+        password = request.data.get("password")
+        if password:
+            request.data["password"] = make_password(password)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        user = serializer.instance
+        if user is None:
+            return Response({"error": "User creation failed"}, status=status.HTTP_400_BAD_REQUEST)
+
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "user": serializer.data,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class ProductViewSet(ModelViewSet):
@@ -59,39 +80,27 @@ class ProductStockViewSet(ModelViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = [IsAuthenticated]
 
-    def get_permissions(self) -> Sequence:
+    def get_permissions(self) -> list[IsAuthenticated | IsWarehouseUser]:
         if self.action in ["retrieve", "update", "partial_update", "destroy"]:
             return [IsAuthenticated(), IsWarehouseUser()]
         return [IsAuthenticated()]
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         warehouse = serializer.validated_data["warehouse"]
+        product = serializer.validated_data["product"]
+        quantity = serializer.validated_data["quantity"]
+
         if not self.request.user.is_superuser and self.request.user not in warehouse.users.all():
             raise PermissionDenied("Вы не можете добавлять товары в чужой склад.")
-        serializer.save()
 
+        existing = ProductStock.objects.filter(product=product, warehouse=warehouse).first()
 
-class LoginAPIView(APIView):
-    def post(self, request: Request) -> Response:
-        data: dict[str, Any] = request.data
-        username = data.get("username")
-        password = data.get("password")
-
-        if not username or not password:
-            return Response({"error": "Нужен и логин, и пароль"}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = authenticate(username=username, password=password)
-        if user is None:
-            return Response({"error": "Неверные данные"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        refresh = RefreshToken.for_user(user)
-        return Response(
-            {
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            },
-            status=status.HTTP_200_OK,
-        )
+        if existing:
+            existing.quantity += quantity
+            existing.save()
+            return
+        else:
+            serializer.save()
 
 
 class LogoutAPIView(APIView):
@@ -99,12 +108,12 @@ class LogoutAPIView(APIView):
 
         refresh_token = request.data.get("refresh_token")
         if not refresh_token:
-            return Response({"error": "Необходим Refresh token"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Need Refresh token"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
         except Exception:
-            return Response({"error": "Неверный Refresh token"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Bad Refresh token"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"success": "Выход успешен"}, status=status.HTTP_200_OK)
+        return Response({"success": "Successful logout"}, status=status.HTTP_200_OK)
