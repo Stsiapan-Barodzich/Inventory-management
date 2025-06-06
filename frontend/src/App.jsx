@@ -12,7 +12,7 @@ import EditWarehouseForm from './components/WarehouseComponents/EditWarehouseFor
 import ProductList from './components/ProductComponents/ProductList.jsx';
 import ProductDetail from './components/ProductComponents/ProductDetail.jsx';
 import AddProductForm from './components/ProductComponents/AddProductForm.jsx';
-import EditProductForm from './components/ProductComponents/EditproductForm.jsx';
+import EditProductForm from './components/ProductComponents/EditProductForm.jsx';
 
 import UserList from './components/UserComponents/UserList.jsx';
 import UserDetail from './components/UserComponents/UserDetail.jsx';
@@ -30,18 +30,18 @@ function App() {
       {user && (
         <nav>
           <ul>
-            <li><Link to="/warehouses">Список складов</Link></li>
-            <li><Link to="/products">Список продуктов</Link></li>
-            <li><Link to="/users">Список пользователей</Link></li>
-            <li><Link to="/product-stocks">Добавить товар на склад</Link></li>
-            <li><button onClick={logoutUser}>Выйти</button></li>
+            <li><Link to="/warehouses">Warehouse list</Link></li>
+            <li><Link to="/products">Product list</Link></li>
+            <li><Link to="/users">User list</Link></li>
+            <li><Link to="/product-stocks">Add productstock</Link></li>
+            <li><button onClick={logoutUser}>Logout</button></li>
           </ul>
         </nav>
       )}
 
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/api/token" replace />} />
+        <Route path="/api/token" element={<Login />} />
 
         <Route path="/warehouses" element={<PrivateRoute><WarehouseList /></PrivateRoute>} />
         <Route path="/warehouses/:id" element={<PrivateRoute><WarehouseDetail /></PrivateRoute>} />

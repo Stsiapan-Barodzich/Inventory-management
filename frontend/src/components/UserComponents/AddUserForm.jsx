@@ -1,41 +1,60 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthFetch } from "../../useAuthFetch";
 
 export default function AddUserForm() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const newUser = { username, email, password };
 
-    const res = await fetch("http://localhost:8000/users/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newUser)
-    });
-
-    if (res.ok) {
-      alert("Пользователь добавлен");
+    try {
+      await authFetch("http://localhost:8000/users/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      });
+      alert("User added successfully");
       navigate("/users");
-    } else {
-      alert("Ошибка при добавлении");
+    } catch (error) {
+      alert("Error while adding user: " + error.message);
     }
   };
 
   return (
     <div>
-      <h2>Добавить пользователя</h2>
+      <h2>Add User</h2>
       <form onSubmit={handleSubmit}>
-        <label>Имя пользователя:</label>
-        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <label>Username:</label>
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+        />
         <label>Email:</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
         <label>Password:</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        <button type="submit">Добавить</button>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button type="submit">Add</button>
       </form>
     </div>
   );

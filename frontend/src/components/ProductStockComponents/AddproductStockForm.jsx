@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthFetch } from "../../useAuthFetch";
 
 export default function AddProductStockForm() {
   const [warehouses, setWarehouses] = useState([]);
@@ -8,26 +9,29 @@ export default function AddProductStockForm() {
   const [selectedProduct, setSelectedProduct] = useState("");
   const [quantity, setQuantity] = useState("");
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
-    
-    fetch("http://localhost:8000/warehouses/")
-      .then((res) => res.json())
-      .then(setWarehouses)
-      .catch((err) => console.error("Ошибка загрузки складов:", err));
-
-    
-    fetch("http://localhost:8000/products/")
-      .then((res) => res.json())
-      .then(setProducts)
-      .catch((err) => console.error("Ошибка загрузки продуктов:", err));
-  }, []);
+    async function fetchData() {
+      try {
+        const [warehousesData, productsData] = await Promise.all([
+          authFetch("http://localhost:8000/warehouses/"),
+          authFetch("http://localhost:8000/products/"),
+        ]);
+        setWarehouses(warehousesData);
+        setProducts(productsData);
+      } catch (error) {
+        alert("Failed to load data: " + error.message);
+      }
+    }
+    fetchData();
+  }, [authFetch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!selectedWarehouse || !selectedProduct || !quantity) {
-      alert("Пожалуйста, заполните все поля");
+      alert("Please fill in all fields");
       return;
     }
 
@@ -37,34 +41,33 @@ export default function AddProductStockForm() {
       quantity: Number(quantity),
     };
 
-    const res = await fetch("http://localhost:8000/product-stocks/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newStock),
-    });
-
-    if (res.ok) {
-      alert("Товар добавлен на склад!");
-      navigate("/product-stocks"); 
-    } else {
-      alert("Ошибка при добавлении товара на склад");
+    try {
+      await authFetch("http://localhost:8000/product-stocks/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStock),
+      });
+      alert("Product stock added successfully!");
+      navigate("/product-stocks");
+    } catch (error) {
+      alert("Failed to add product stock: " + error.message);
     }
   };
 
   return (
     <div>
-      <h2>Добавление товара на склад</h2>
+      <h2>Add Product Stock</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Склад:</label>
+          <label>Warehouse:</label>
           <select
             value={selectedWarehouse}
             onChange={(e) => setSelectedWarehouse(e.target.value)}
             required
           >
-            <option value="">-- Выберите склад --</option>
+            <option value="">-- Choose a warehouse --</option>
             {warehouses.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -74,13 +77,13 @@ export default function AddProductStockForm() {
         </div>
 
         <div>
-          <label>Продукт:</label>
+          <label>Product:</label>
           <select
             value={selectedProduct}
             onChange={(e) => setSelectedProduct(e.target.value)}
             required
           >
-            <option value="">-- Выберите продукт --</option>
+            <option value="">-- Choose a product --</option>
             {products.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -90,7 +93,7 @@ export default function AddProductStockForm() {
         </div>
 
         <div>
-          <label>Количество:</label>
+          <label>Quantity:</label>
           <input
             type="number"
             min="0"
@@ -100,7 +103,7 @@ export default function AddProductStockForm() {
           />
         </div>
 
-        <button type="submit">Добавить товар на склад</button>
+        <button type="submit">Add Product Stock</button>
       </form>
     </div>
   );

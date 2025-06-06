@@ -1,28 +1,31 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuthFetch } from "../../useAuthFetch";
 
 export default function UserList() {
   const [users, setUsers] = useState([]);
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
-    fetch("http://localhost:8000/users/")
-      .then(res => res.json())
-      .then(data => setUsers(data))
-      .catch(err => console.error("Ошибка при загрузке пользователей:", err));
-  }, []);
+    authFetch("http://localhost:8000/users/")
+      .then(setUsers)
+      .catch((err) =>
+        console.error("Error loading users:", err)
+      );
+  }, [authFetch]);
 
   return (
     <div>
-      <h2>Пользователи</h2>
+      <h2>Users</h2>
       <ul>
-        {users.map(user => (
+        {users.map((user) => (
           <li key={user.id}>
             <Link to={`/users/${user.id}`}>{user.username}</Link>
           </li>
         ))}
       </ul>
       <Link to="/users/add">
-        <button>Добавить пользователя</button>
+        <button>Add User</button>
       </Link>
     </div>
   );

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuthFetch } from "../../useAuthFetch";
 
 export default function EditProductForm() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -11,23 +13,18 @@ export default function EditProductForm() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    
-    fetch(`http://localhost:8000/products/${id}/`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch product");
-        return res.json();
-      })
+    authFetch(`http://localhost:8000/products/${id}/`)
       .then((data) => {
         setName(data.name);
         setPrice(data.price);
         setDescription(data.description);
         setLoading(false);
       })
-      .catch((err) => {
-        alert("Ошибка при загрузке продукта");
+      .catch(() => {
+        alert("Failed to load product");
         navigate("/products");
       });
-  }, [id, navigate]);
+  }, [id, navigate, authFetch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,30 +35,29 @@ export default function EditProductForm() {
       description,
     };
 
-    const res = await fetch(`http://localhost:8000/products/${id}/`, {
-      method: "PATCH", 
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedProduct),
-    });
-
-    if (res.ok) {
-      alert("Продукт успешно обновлен");
+    try {
+      await authFetch(`http://localhost:8000/products/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedProduct),
+      });
+      alert("Product updated successfully");
       navigate("/products");
-    } else {
-      alert("Ошибка при обновлении продукта");
+    } catch {
+      alert("Failed to update product");
     }
   };
 
-  if (loading) return <p>Загрузка...</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
-    <div>
-      <h2>Редактировать продукт</h2>
+    <div className="container">
+      <h2>Edit Product</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Название:</label>
+          <label>Name:</label>
           <input
             type="text"
             value={name}
@@ -71,7 +67,7 @@ export default function EditProductForm() {
         </div>
 
         <div>
-          <label>Цена:</label>
+          <label>Price:</label>
           <input
             type="number"
             step="0.01"
@@ -82,14 +78,14 @@ export default function EditProductForm() {
         </div>
 
         <div>
-          <label>Описание:</label>
+          <label>Description:</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
-        <button type="submit">Сохранить</button>
+        <button type="submit">Save</button>
       </form>
     </div>
   );

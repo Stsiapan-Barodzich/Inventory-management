@@ -5,6 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
+
   const [authTokens, setAuthTokens] = useState(() =>
     localStorage.getItem("authTokens") ? JSON.parse(localStorage.getItem("authTokens")) : null
   );
@@ -14,13 +15,14 @@ export const AuthProvider = ({ children }) => {
   );
 
   const loginUser = async (username, password) => {
-    const response = await fetch("http://localhost:8000/login/", {
+    const response = await fetch("http://localhost:8000/api/token/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password }),
     });
-    const data = await response.json();
+
     if (response.ok) {
+      const data = await response.json();
       setAuthTokens(data);
       setUser(JSON.parse(atob(data.access.split('.')[1])));
       localStorage.setItem("authTokens", JSON.stringify(data));
@@ -34,8 +36,16 @@ export const AuthProvider = ({ children }) => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem("authTokens");
-    navigate("/login");
+    navigate("/api/token");
   };
+
+  useEffect(() => {
+    if (authTokens) {
+      setUser(JSON.parse(atob(authTokens.access.split('.')[1])));
+    } else {
+      setUser(null);
+    }
+  }, [authTokens]);
 
   const contextData = { user, authTokens, loginUser, logoutUser };
 

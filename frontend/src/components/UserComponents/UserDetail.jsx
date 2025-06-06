@@ -1,39 +1,56 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuthFetch } from "../../useAuthFetch";
 
 export default function UserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
+
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/users/${id}/`)
-      .then(res => res.json())
-      .then(data => setUser(data));
-  }, [id]);
+    authFetch(`http://localhost:8000/users/${id}/`)
+      .then((data) => {
+        setUser(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading user:", err);
+        navigate("/users");
+      });
+  }, [id, authFetch, navigate]);
 
   const handleDelete = async () => {
-    const res = await fetch(`http://localhost:8000/users/${id}/`, {
-      method: "DELETE"
-    });
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
 
-    if (res.ok) {
-      alert("Пользователь удалён");
+    try {
+      await authFetch(`http://localhost:8000/users/${id}/`, {
+        method: "DELETE",
+      });
+      alert("User deleted");
       navigate("/users");
+    } catch (err) {
+      alert("Error deleting user: " + err.message);
     }
   };
 
-  if (!user) return <div>Загрузка...</div>;
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div>
       <h2>{user.username}</h2>
       <p>Email: {user.email}</p>
-      <button onClick={() => navigate(`/users/edit/${id}`)}>Редактировать</button>
-      <button onClick={handleDelete}>Удалить</button>
-
+      <button onClick={() => navigate(`/users/edit/${id}`)}>Edit</button>
+      <button
+        onClick={handleDelete}
+        style={{ marginLeft: "10px", backgroundColor: "#ff4d4f", color: "#fff" }}
+      >
+        Delete
+      </button>
       <br /><br />
-      <button onClick={() => navigate("/users")}>← Список пользователей</button>
+      <button onClick={() => navigate("/users")}>← User List</button>
     </div>
   );
 }

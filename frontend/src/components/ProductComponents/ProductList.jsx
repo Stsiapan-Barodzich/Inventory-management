@@ -1,22 +1,29 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuthFetch } from "../../useAuthFetch";
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
-    fetch("http://localhost:8000/products/")
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.error("Ошибка загрузки продуктов:", err));
-  }, []);
+    async function fetchProducts() {
+      try {
+        const data = await authFetch("http://localhost:8000/products/");
+        setProducts(data);
+      } catch (error) {
+        console.error("Error loading products:", error);
+      }
+    }
+    fetchProducts();
+  }, [authFetch]);
 
   return (
     <div>
-      <h2>Список продуктов</h2>
+      <h2>Product List</h2>
 
       <Link to="/products/add">
-        <button>Добавить продукт</button>
+        <button>Add Product</button>
       </Link>
 
       <ul>
