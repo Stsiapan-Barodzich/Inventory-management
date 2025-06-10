@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function EditProductForm() {
   const { id } = useParams();
@@ -11,6 +12,8 @@ export default function EditProductForm() {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     authFetch(`http://localhost:8000/products/${id}/`)
@@ -21,13 +24,15 @@ export default function EditProductForm() {
         setLoading(false);
       })
       .catch(() => {
-        alert("Failed to load product");
+        setError("Failed to load product");
         navigate("/products");
       });
   }, [id, navigate, authFetch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); 
+    setSuccess("");
 
     const updatedProduct = {
       name,
@@ -43,10 +48,13 @@ export default function EditProductForm() {
         },
         body: JSON.stringify(updatedProduct),
       });
-      alert("Product updated successfully");
-      navigate("/products");
+      setError(""); 
+      setSuccess("Product edited successfully!");
+      setTimeout(() => {
+        navigate("/products");
+      }, 1000);
     } catch {
-      alert("Failed to update product");
+      setError("Failed to update product");
     }
   };
 
@@ -54,6 +62,8 @@ export default function EditProductForm() {
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} />}
       <div className="card">
         <h2>Edit Product</h2>
         <form onSubmit={handleSubmit}>

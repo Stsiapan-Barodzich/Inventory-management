@@ -95,6 +95,7 @@ body {
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.1s ease;
+  margin-bottom: 10px;
 }
 
 .btn-primary {

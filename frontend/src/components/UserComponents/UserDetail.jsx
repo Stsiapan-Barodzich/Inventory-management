@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function UserDetail() {
   const { id } = useParams();
@@ -9,6 +10,7 @@ export default function UserDetail() {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     authFetch(`http://localhost:8000/users/${id}/`)
@@ -18,6 +20,7 @@ export default function UserDetail() {
       })
       .catch((err) => {
         console.error("Error loading user:", err);
+        setError("Error loading user");
         navigate("/users");
       });
   }, [id, authFetch, navigate]);
@@ -29,10 +32,10 @@ export default function UserDetail() {
       await authFetch(`http://localhost:8000/users/${id}/`, {
         method: "DELETE",
       });
-      alert("User deleted");
+      setError(""); // Сброс ошибки при успехе
       navigate("/users");
     } catch (err) {
-      alert("Error deleting user: " + err.message);
+      setError("Error deleting user: " + err.message);
     }
   };
 
@@ -40,6 +43,7 @@ export default function UserDetail() {
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
       <div className="card">
         <h2>{user.username}</h2>
         <p><strong>Email:</strong> {user.email}</p>

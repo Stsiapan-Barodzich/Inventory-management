@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function AddWarehouseForm() {
   const [name, setName] = useState("");
@@ -9,18 +10,23 @@ export default function AddWarehouseForm() {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const navigate = useNavigate();
   const authFetch = useAuthFetch();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
 
   useEffect(() => {
     authFetch("http://localhost:8000/users/")
       .then(setUsers)
       .catch((err) => {
         console.error("Failed to load users:", err);
-        alert("Error loading user list.");
+        setError("Error loading user list.");
       });
   }, [authFetch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); 
+    setSuccess(""); 
 
     const newWarehouse = {
       name,
@@ -37,16 +43,21 @@ export default function AddWarehouseForm() {
         body: JSON.stringify(newWarehouse),
       });
 
-      alert("Warehouse added!");
-      navigate("/warehouses");
+      setError(""); 
+      setSuccess("Warehouse aded successfully!");
+      setTimeout(() => {
+        navigate("/warehouses");
+      }, 1000); 
     } catch (error) {
-      console.error("Failed to add warehouse:", error);
-      alert("Error adding warehouse: " + error.message);
+      setError("Error adding warehouse: " + error.message);
     }
   };
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} />}
+
       <div className="card">
         <h2>Add Warehouse</h2>
         <form onSubmit={handleSubmit}>

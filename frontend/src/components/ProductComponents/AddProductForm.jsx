@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function AddProductForm() {
   const [name, setName] = useState("");
@@ -8,9 +9,13 @@ export default function AddProductForm() {
   const [description, setDescription] = useState("");
   const navigate = useNavigate();
   const authFetch = useAuthFetch();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); 
+    setSuccess("");
 
     const newProduct = { name, price, description };
 
@@ -22,15 +27,20 @@ export default function AddProductForm() {
         },
         body: JSON.stringify(newProduct),
       });
-      alert("Product added successfully!");
-      navigate("/products");
+      setError(""); 
+      setSuccess("Product added successfully!");
+      setTimeout(() => {
+        navigate("/products");
+      }, 1000);
     } catch {
-      alert("Failed to add product");
+      setError("Failed to add product.");
     }
   };
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} />}
       <div className="card">
         <h2>Add Product</h2>
         <form onSubmit={handleSubmit}>

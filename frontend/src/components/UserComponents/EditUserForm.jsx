@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function EditUserForm() {
   const { id } = useParams();
@@ -10,6 +11,8 @@ export default function EditUserForm() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     authFetch(`http://localhost:8000/users/${id}/`)
@@ -20,25 +23,36 @@ export default function EditUserForm() {
       })
       .catch((err) => {
         console.error("Error loading user:", err);
+        setError("Error loading user: " + err.message);
         navigate("/users");
       });
   }, [id, authFetch, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
+    console.log("Submitting:", { username, email });
 
     try {
-      await authFetch(`http://localhost:8000/users/${id}/`, {
+      console.log("Sending PATCH request for user ID:", id);
+      const response = await authFetch(`http://localhost:8000/users/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, email }),
       });
-      alert("User updated successfully");
-      navigate(`/users/${id}`);
+      console.log("Response received:", response);
+      setSuccess("User edited successfully!");
+      setError(""); // Сброс ошибки при успехе
+      // Задержка для отображения сообщения
+      setTimeout(() => {
+        navigate(`/users/${id}`);
+      }, 1000); // Задержка 1 секунда
     } catch (err) {
-      alert("Error updating user: " + err.message);
+      console.error("API error:", err);
+      setError("Error updating user: " + err.message);
     }
   };
 
@@ -46,6 +60,8 @@ export default function EditUserForm() {
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} />}
       <div className="card">
         <h2>Edit User</h2>
         <form onSubmit={handleSubmit}>

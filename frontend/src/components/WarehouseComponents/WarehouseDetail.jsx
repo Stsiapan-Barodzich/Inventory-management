@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function WarehouseDetail() {
   const { id } = useParams();
@@ -11,6 +12,7 @@ export default function WarehouseDetail() {
   const [products, setProducts] = useState([]);
   const [showProducts, setShowProducts] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     authFetch(`http://localhost:8000/warehouses/${id}/`)
@@ -20,6 +22,7 @@ export default function WarehouseDetail() {
       })
       .catch((err) => {
         console.error("Error fetching warehouse:", err);
+        setError("Error loading warehouse");
         navigate("/warehouses");
       });
   }, [id, navigate, authFetch]);
@@ -30,7 +33,7 @@ export default function WarehouseDetail() {
       setProducts(data);
       setShowProducts(true);
     } catch (error) {
-      alert("Error loading products: " + error.message);
+      setError("Error loading products: " + error.message);
     }
   };
 
@@ -41,10 +44,10 @@ export default function WarehouseDetail() {
       await authFetch(`http://localhost:8000/warehouses/${id}/`, {
         method: "DELETE",
       });
-      alert("Warehouse deleted");
+      setError(""); // Сброс ошибки при успехе
       navigate("/warehouses");
     } catch (error) {
-      alert("Error deleting warehouse: " + error.message);
+      setError("Error deleting warehouse: " + error.message);
     }
   };
 
@@ -52,6 +55,7 @@ export default function WarehouseDetail() {
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
       <div className="card">
         <h2>{warehouse.name}</h2>
         <p><strong>Location:</strong> {warehouse.location}</p>
