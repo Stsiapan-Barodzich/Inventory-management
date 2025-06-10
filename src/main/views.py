@@ -1,9 +1,11 @@
+from typing import Sequence, cast
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
@@ -33,7 +35,7 @@ class WarehouseViewSet(ModelViewSet):
         warehouse = self.get_object()
         product_stocks = ProductStock.objects.filter(warehouse=warehouse)
         data = [{"product_name": ps.product.name, "quantity": ps.quantity} for ps in product_stocks]
-        return Response(data)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(ModelViewSet):
@@ -42,29 +44,42 @@ class UserViewSet(ModelViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = [IsAuthenticated]
 
+    def get_permissions(self) -> Sequence[BasePermission]:
+        if self.action == "create":
+            return [AllowAny()]
+        return cast(Sequence[BasePermission], super().get_permissions())
+
     def create(self, request: Request, *args: str, **kwargs: str) -> Response:
+        data = request.data.copy()
+        password = data.get("password")
 
-        password = request.data.get("password")
-        if password:
-            request.data["password"] = make_password(password)
+        if not password:
+            return Response({"error": "Password required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not data.get("username"):
+            return Response({"error": "Username required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not data.get("email"):
+            return Response({"error": "Email required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        data["password"] = make_password(password)
+
+        serializer = self.get_serializer(data=data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         self.perform_create(serializer)
 
+        # Generate JWT-tokens
         user = serializer.instance
         if user is None:
-            return Response({"error": "User creation failed"}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({"error": "Failed to create user."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         refresh = RefreshToken.for_user(user)
-        return Response(
-            {
-                "user": serializer.data,
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            },
-            status=status.HTTP_201_CREATED,
-        )
+
+        response_data = {
+            "user": serializer.data,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class ProductViewSet(ModelViewSet):
@@ -80,7 +95,7 @@ class ProductStockViewSet(ModelViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = [IsAuthenticated]
 
-    def get_permissions(self) -> list[IsAuthenticated | IsWarehouseUser]:
+    def get_permissions(self) -> list | list[IsAuthenticated]:
         if self.action in ["retrieve", "update", "partial_update", "destroy"]:
             return [IsAuthenticated(), IsWarehouseUser()]
         return [IsAuthenticated()]
@@ -91,29 +106,28 @@ class ProductStockViewSet(ModelViewSet):
         quantity = serializer.validated_data["quantity"]
 
         if not self.request.user.is_superuser and self.request.user not in warehouse.users.all():
-            raise PermissionDenied("Вы не можете добавлять товары в чужой склад.")
+            raise PermissionDenied("You can add products only to your warehouses.")
 
         existing = ProductStock.objects.filter(product=product, warehouse=warehouse).first()
-
         if existing:
             existing.quantity += quantity
             existing.save()
-            return
         else:
             serializer.save()
 
 
 class LogoutAPIView(APIView):
-    def post(self, request: Request) -> Response:
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request: Request) -> Response:
         refresh_token = request.data.get("refresh_token")
         if not refresh_token:
-            return Response({"error": "Need Refresh token"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Need refresh-token"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
+            return Response({"success": "Successful log out"}, status=status.HTTP_200_OK)
         except Exception:
-            return Response({"error": "Bad Refresh token"}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({"success": "Successful logout"}, status=status.HTTP_200_OK)
+            return Response({"error": "Bad refresh-token"}, status=status.HTTP_400_BAD_REQUEST)
