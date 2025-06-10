@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function EditWarehouseForm() {
   const { id } = useParams();
@@ -9,6 +10,8 @@ export default function EditWarehouseForm() {
   const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(true);
   const authFetch = useAuthFetch();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     authFetch(`http://localhost:8000/warehouses/${id}/`)
@@ -19,13 +22,15 @@ export default function EditWarehouseForm() {
       })
       .catch((err) => {
         console.error("Error fetching warehouse:", err);
-        alert("Error loading warehouse");
+        setError("Error loading warehouse");
         navigate("/warehouses");
       });
   }, [id, navigate, authFetch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); 
+    setSuccess(""); 
 
     const updatedWarehouse = {
       name,
@@ -41,11 +46,15 @@ export default function EditWarehouseForm() {
         body: JSON.stringify(updatedWarehouse),
       });
 
-      alert("Warehouse successfully updated");
-      navigate("/warehouses");
+
+      setError(""); 
+      setSuccess("Warehouse edited successfully!");
+      setTimeout(() => {
+        navigate("/warehouses");
+      }, 1000); 
     } catch (error) {
       console.error("Error updating warehouse:", error);
-      alert("Error updating warehouse: " + error.message);
+      setError("Error updating warehouse: " + error.message);
     }
   };
 
@@ -53,6 +62,8 @@ export default function EditWarehouseForm() {
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} />}
       <div className="card">
         <h2>Edit Warehouse</h2>
         <form onSubmit={handleSubmit}>

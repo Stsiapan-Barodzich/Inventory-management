@@ -33,7 +33,6 @@ const Logout = () => {
         navigate('/api/token');
       } catch (error) {
         console.error('Logout failed:', error);
-        // В случае ошибки все равно очищаем токены
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         setAuthTokens(null);

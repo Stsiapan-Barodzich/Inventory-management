@@ -1,12 +1,15 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const authFetch = useAuthFetch();
+  const [error, setError] = useState("");
+  
 
   useEffect(() => {
     authFetch(`http://localhost:8000/products/${id}/`)
@@ -14,7 +17,7 @@ export default function ProductDetail() {
         setProduct(data);
       })
       .catch((err) => {
-        alert("Failed to load product");
+        setError("Failed to load product");
         navigate("/products");
       });
   }, [id, navigate, authFetch]);
@@ -24,11 +27,11 @@ export default function ProductDetail() {
 
     authFetch(`http://localhost:8000/products/${id}/`, { method: "DELETE" })
       .then(() => {
-        alert("Product deleted");
+        setError(""); 
         navigate("/products");
       })
       .catch(() => {
-        alert("Failed to delete product");
+        setError("Failed to delete product");
       });
   };
 
@@ -36,6 +39,7 @@ export default function ProductDetail() {
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
       <div className="card">
         <h2>{product.name}</h2>
         <p><strong>Price:</strong> {product.price}</p>

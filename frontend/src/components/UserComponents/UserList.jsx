@@ -9,9 +9,6 @@ export default function UserList() {
   useEffect(() => {
     authFetch("http://localhost:8000/users/")
       .then(setUsers)
-      .catch((err) =>
-        console.error("Error loading users:", err)
-      );
   }, [authFetch]);
 
   return (

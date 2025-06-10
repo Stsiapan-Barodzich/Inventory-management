@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function AddProductStockForm() {
   const [warehouses, setWarehouses] = useState([]);
@@ -10,6 +11,8 @@ export default function AddProductStockForm() {
   const [quantity, setQuantity] = useState("");
   const navigate = useNavigate();
   const authFetch = useAuthFetch();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -21,7 +24,8 @@ export default function AddProductStockForm() {
         setWarehouses(warehousesData);
         setProducts(productsData);
       } catch (error) {
-        alert("Failed to load data: " + error.message);
+        setError("Failed to load data: " + error.message);
+        console.error("Fetch error:", error);
       }
     }
     fetchData();
@@ -29,9 +33,13 @@ export default function AddProductStockForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); 
+    setSuccess(""); 
+    console.log("Submitting:", { selectedWarehouse, selectedProduct, quantity });
 
     if (!selectedWarehouse || !selectedProduct || !quantity) {
-      alert("Please fill in all fields");
+      setError("Please fill in all fields");
+      console.log("Validation failed");
       return;
     }
 
@@ -42,22 +50,29 @@ export default function AddProductStockForm() {
     };
 
     try {
-      await authFetch("http://localhost:8000/product-stocks/", {
+      console.log("Sending request with:", newStock);
+      const response = await authFetch("http://localhost:8000/product-stocks/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newStock),
       });
-      alert("Product stock added successfully!");
-      navigate("/product-stocks");
+      setSuccess("Product stock added successfully!"); 
+      
+      setTimeout(() => {
+        navigate("/product-stocks");
+      }, 1000); 
     } catch (error) {
-      alert("Failed to add product stock: " + error.message);
+      console.error("API error:", error);
+      setError("Failed to add product stock: " + error.message);
     }
   };
 
   return (
     <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
+      {success && <ErrorMessage message={success} />}
       <div className="card">
         <h2>Add Product Stock</h2>
         <form onSubmit={handleSubmit}>
