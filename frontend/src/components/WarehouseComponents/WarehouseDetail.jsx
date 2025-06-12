@@ -10,32 +10,28 @@ export default function WarehouseDetail() {
 
   const [warehouse, setWarehouse] = useState(null);
   const [products, setProducts] = useState([]);
-  const [showProducts, setShowProducts] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    authFetch(`http://localhost:8000/warehouses/${id}/`)
-      .then((data) => {
-        setWarehouse(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching warehouse:", err);
-        setError("Error loading warehouse");
-        navigate("/warehouses");
-      });
-  }, [id, navigate, authFetch]);
+    const fetchData = async () => {
+      try {
+        const warehouseData = await authFetch(`http://localhost:8000/warehouses/${id}/`);
+        setWarehouse(warehouseData);
 
-  const fetchProducts = async () => {
-    try {
-      const data = await authFetch(`http://localhost:8000/warehouses/${id}/products/`);
-      setProducts(data);
-      setShowProducts(true);
-    } catch (error) {
-      setError("Error loading products: " + error.message);
-    }
-  };
+        const productData = await authFetch(`http://localhost:8000/warehouses/${id}/products/`);
+        setProducts(productData);
+
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching warehouse or products:", err);
+        setError("Error loading warehouse or products");
+        navigate("/warehouses");
+      }
+    };
+
+    fetchData();
+  }, [id, navigate, authFetch]);
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this warehouse?")) return;
@@ -44,7 +40,7 @@ export default function WarehouseDetail() {
       await authFetch(`http://localhost:8000/warehouses/${id}/`, {
         method: "DELETE",
       });
-      setError(""); // Сброс ошибки при успехе
+      setError("");
       navigate("/warehouses");
     } catch (error) {
       setError("Error deleting warehouse: " + error.message);
@@ -58,37 +54,45 @@ export default function WarehouseDetail() {
       {error && <ErrorMessage message={error} />}
       <div className="card">
         <h2>{warehouse.name}</h2>
-        <p><strong>Location:</strong> {warehouse.location}</p>
+        <h3>Location:</h3>
+        <p>{warehouse.location}</p>
+        <div style={{ marginTop: "20px" }}>
+          <h3>Products in Warehouse:</h3>
+          {products.length === 0 ? (
+            <p>No products found in this warehouse</p>
+          ) : (
+            <ul>
+              {products.map((p) => (
+                <li key={p.id || p.product_name}>
+                  {p.product_name} — {p.quantity}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div style={{ marginTop: "20px" }}>
+          <h3>Warehouse owners:</h3>
+          {warehouse.users && warehouse.users.length > 0 ? (
+            <ul>
+              {warehouse.users.map((user) => (
+                <li key={user.id}>
+                  {user.username} ({user.email})
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>No owners assigned to this warehouse</p>
+          )}
+        </div>
+
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button className="btn btn-primary" onClick={() => navigate(`/warehouses/edit/${id}`)}>
-            Edit
+          <button className="btn btn-back" onClick={() => navigate("/warehouses")}>
+            ← Back to Warehouses List
           </button>
           <button className="btn btn-danger" onClick={handleDelete}>
             Delete
           </button>
-          <button className="btn btn-primary" onClick={fetchProducts}>
-            Show Products
-          </button>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate("/warehouses")}>
-          ← Back to Warehouses List
-        </button>
-        {showProducts && (
-          <div>
-            <h3>Products in Warehouse:</h3>
-            {products.length === 0 ? (
-              <p>No products found in this warehouse</p>
-            ) : (
-              <ul>
-                {products.map((p) => (
-                  <li key={p.id || p.product_name}>
-                    {p.product_name} — {p.quantity}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

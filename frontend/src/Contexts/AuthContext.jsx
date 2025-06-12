@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   const loginUser = async (username, password) => {
-    const response = await fetch("http://localhost:8000/api/token/", {
+    const response = await fetch("http://localhost:8000/login/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
@@ -24,9 +24,9 @@ export const AuthProvider = ({ children }) => {
       setAuthTokens(data);
       setUser(JSON.parse(atob(data.access.split('.')[1])));
       localStorage.setItem("authTokens", JSON.stringify(data));
-      return true; // <-- успех
+      return true; 
     } else {
-      return false; // <-- ошибка
+      return false;
     }
   };
 

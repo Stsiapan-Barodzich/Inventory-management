@@ -30,14 +30,14 @@ const Logout = () => {
         setAuthTokens(null);
         setIsAuthenticated(false);
         
-        navigate('/api/token');
+        navigate('/login');
       } catch (error) {
         console.error('Logout failed:', error);
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         setAuthTokens(null);
         setIsAuthenticated(false);
-        navigate('/api/token');
+        navigate('/login');
       }
     };
 

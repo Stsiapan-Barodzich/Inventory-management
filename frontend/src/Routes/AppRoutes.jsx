@@ -20,8 +20,8 @@ import AddProductStockForm from '../components/ProductStockComponents/AddProduct
 function AppRoutes() {
   return (
     <>
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="/api/token" element={<Login />} />
+      <Route path="/" element={<Navigate to="/login/" replace />} />
+      <Route path="/login/" element={<Login />} />
       <Route path="/register" element={<AddUserForm />} />
       <Route path="/logout" element={<Logout />} />
       
