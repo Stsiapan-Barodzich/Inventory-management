@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAuth } from "../Contexts/AuthContext";
+import { useAuth } from "@Contexts/AuthContext";
 
 export function useAuthFetch() {
   const { authTokens, logout } = useAuth();

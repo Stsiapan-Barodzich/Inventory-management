@@ -1,25 +1,25 @@
-import { Route, Navigate } from 'react-router-dom';
+import { Route, Navigate, Routes } from 'react-router-dom';
 import PrivateRoute from './PrivateRoute.jsx';
-import Layout from '../components/SharedComponents/Layout/Layout.jsx';
-import Login from '../components/AuthComponents/Login.jsx';
-import Logout from '../components/AuthComponents/Logout.jsx';
-import WarehouseList from '../components/WarehouseComponents/WarehouseList.jsx';
-import WarehouseDetail from '../components/WarehouseComponents/WarehouseDetail.jsx';
-import AddWarehouseForm from '../components/WarehouseComponents/AddWarehouseForm.jsx';
-import EditWarehouseForm from '../components/WarehouseComponents/EditWarehouseForm.jsx';
-import ProductList from '../components/ProductComponents/ProductList.jsx';
-import ProductDetail from '../components/ProductComponents/ProductDetail.jsx';
-import AddProductForm from '../components/ProductComponents/AddProductForm.jsx';
-import EditProductForm from '../components/ProductComponents/EditProductForm.jsx';
-import UserList from '../components/UserComponents/UserList.jsx';
-import UserDetail from '../components/UserComponents/UserDetail.jsx';
-import AddUserForm from '../components/UserComponents/AddUserForm.jsx';
-import EditUserForm from '../components/UserComponents/EditUserForm.jsx';
-import AddProductStockForm from '../components/ProductStockComponents/AddProductStockForm.jsx';
+import Layout from '@components/SharedComponents/Layout/Layout.jsx';
+import Login from '@components/AuthComponents/Login.jsx';
+import Logout from '@components/AuthComponents/Logout.jsx';
+import WarehouseList from '@components/WarehouseComponents/WarehouseList.jsx';
+import WarehouseDetail from '@components/WarehouseComponents/WarehouseDetail.jsx';
+import AddWarehouseForm from '@components/WarehouseComponents/AddWarehouseForm.jsx';
+import EditWarehouseForm from '@components/WarehouseComponents/EditWarehouseForm.jsx';
+import ProductList from '@components/ProductComponents/ProductList.jsx';
+import ProductDetail from '@components/ProductComponents/ProductDetail.jsx';
+import AddProductForm from '@components/ProductComponents/AddProductForm.jsx';
+import EditProductForm from '@components/ProductComponents/EditProductForm.jsx';
+import UserList from '@components/UserComponents/UserList.jsx';
+import UserDetail from '@components/UserComponents/UserDetail.jsx';
+import AddUserForm from '@components/UserComponents/AddUserForm.jsx';
+import EditUserForm from '@components/UserComponents/EditUserForm.jsx';
+import AddProductStockForm from '@components/ProductStockComponents/AddProductStockForm.jsx';
 
-function AppRoutes() {
+function AppRoutes(){
   return (
-    <>
+    <Routes>
       <Route path="/" element={<Navigate to="/login/" replace />} />
       <Route path="/login/" element={<Login />} />
       <Route path="/register" element={<AddUserForm />} />
@@ -42,7 +42,7 @@ function AppRoutes() {
           <Route path="/product-stocks" element={<AddProductStockForm />} />
         </Route>
       </Route>
-    </>
+    </Routes>
   );
 }
 
