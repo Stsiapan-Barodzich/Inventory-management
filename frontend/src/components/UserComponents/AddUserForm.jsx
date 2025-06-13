@@ -32,7 +32,7 @@ export default function AddUserForm() {
       setSuccess("User added successfully!");
       setTimeout(() => {
         navigate("/users");
-      }, 1000); // Задержка 1 секунда
+      }, 1000); 
     } catch (error) {
       setError("Error while adding user: " + error.message);
     }

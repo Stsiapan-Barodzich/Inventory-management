@@ -19,6 +19,7 @@ import AddProductStockForm from '../components/ProductStockComponents/AddProduct
 import TransferProductForm from '../components/TransferComponents/TransferProductForm.jsx';
 import TransferLogList from '../components/TransferComponents/TransferLogList.jsx';
 import ProductStockList from '../components/ProductStockComponents/ProductStockList.jsx';
+import AddCategoryForm from '../components/CategoriesComponents/AddCategoryForm.jsx';
 function AppRoutes() {
   return (
     <>
@@ -45,6 +46,8 @@ function AppRoutes() {
           <Route path="/add-product-stock" element={<AddProductStockForm />} />
           <Route path="/transfer" element={<TransferProductForm />} />
           <Route path="/transfer-logs" element={<TransferLogList />} />
+          <Route path="/categories" element={<AddCategoryForm />} />
+
         </Route>
       </Route>
     </>

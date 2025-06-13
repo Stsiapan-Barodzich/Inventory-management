@@ -100,11 +100,7 @@ export default function AddProductStockForm() {
   return (
     <div className="container fade-in">
       {error && <ErrorMessage message={error} />}
-      {success && (
-        <div className="success-message" style={{ color: "green", marginBottom: "10px" }}>
-          {success}
-        </div>
-      )}
+      {success && <ErrorMessage message={success} isSuccess={true} />}
       <div className="card">
         <h2>Add Product Stock</h2>
         {warehouses.length === 0 && <p>No warehouses available.</p>}

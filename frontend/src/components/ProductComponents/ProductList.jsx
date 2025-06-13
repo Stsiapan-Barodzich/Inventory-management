@@ -4,24 +4,49 @@ import { useAuthFetch } from "../../hooks/useAuthFetch";
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const authFetch = useAuthFetch();
 
   useEffect(() => {
-    async function fetchProducts() {
+    async function fetchData() {
       try {
-        const data = await authFetch("http://localhost:8000/products/");
-        setProducts(data);
+        const [productsData, categoriesData] = await Promise.all([
+          authFetch(`http://localhost:8000/products/?category=${selectedCategory || ""}`),
+          authFetch("http://localhost:8000/categories/"),
+        ]);
+        setProducts(Array.isArray(productsData) ? productsData : []);
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
       } catch (error) {
-        console.error("Error loading products:", error);
+        console.error("Error loading data:", error);
       }
     }
-    fetchProducts();
-  }, [authFetch]);
+    fetchData();
+  }, [authFetch, selectedCategory]);
+
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
+  };
 
   return (
     <div className="container fade-in">
       <div className="card">
         <h2>Product List</h2>
+        <div className="form-group" style={{ marginBottom: "20px" }}>
+          <label htmlFor="categoryFilter">Filter by Category:</label>
+          <select
+            id="categoryFilter"
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+          >
+            <option value="">All Categories</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <Link to="/products/add">
           <button className="btn btn-success" style={{ marginBottom: "20px" }}>
             Add Product
@@ -32,6 +57,7 @@ export default function ProductList() {
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Price</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -41,6 +67,11 @@ export default function ProductList() {
                   <td>
                     <Link to={`/products/${product.id}`}>
                       {product.name}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link to={`/products/${product.id}`}>
+                      {product.price}
                     </Link>
                   </td>
                   <td>

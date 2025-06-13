@@ -32,7 +32,7 @@ export default function UserDetail() {
       await authFetch(`http://localhost:8000/users/${id}/`, {
         method: "DELETE",
       });
-      setError(""); // Сброс ошибки при успехе
+      setError(""); 
       navigate("/users");
     } catch (err) {
       setError("Error deleting user: " + err.message);

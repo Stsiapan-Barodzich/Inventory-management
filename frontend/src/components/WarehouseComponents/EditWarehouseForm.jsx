@@ -18,7 +18,6 @@ export default function EditWarehouseForm() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    // Загрузка склада и списка всех пользователей
     const fetchData = async () => {
       try {
         const warehouse = await authFetch(`http://localhost:8000/warehouses/${id}/`);
@@ -47,7 +46,7 @@ export default function EditWarehouseForm() {
     const updatedWarehouse = {
       name,
       location,
-      users: selectedUsers, // передаём массив ID
+      users: selectedUsers, 
     };
 
     try {
