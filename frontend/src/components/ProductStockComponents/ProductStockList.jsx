@@ -7,32 +7,59 @@ export default function ProductStockList() {
   const [stocks, setStocks] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const authFetch = useAuthFetch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function fetchStocks() {
+    async function fetchData() {
       try {
         setIsLoading(true);
-        const data = await authFetch("http://localhost:8000/product-stocks/");
-        console.log("Fetched stocks:", data);
-        setStocks(Array.isArray(data) ? data : []);
+        const [stocksData, categoriesData] = await Promise.all([
+          authFetch(`http://localhost:8000/product-stocks/?category=${selectedCategory || ""}`),
+          authFetch("http://localhost:8000/categories/"),
+        ]);
+        console.log("Fetched stocks:", stocksData);
+        console.log("Fetched categories:", categoriesData);
+        setStocks(Array.isArray(stocksData) ? stocksData : []);
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
       } catch (error) {
-        setError("Failed to load stocks: " + error.message);
+        setError("Failed to load data: " + error.message);
         console.error("Fetch error:", error);
         setStocks([]);
+        setCategories([]);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchStocks();
-  }, [authFetch]);
+    fetchData();
+  }, [authFetch, selectedCategory]);
+
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
+  };
 
   return (
     <div className="container fade-in">
       {error && <ErrorMessage message={error} />}
       <div className="card">
         <h2>Product Stocks</h2>
+        <div className="form-group" style={{ marginBottom: "20px" }}>
+          <label htmlFor="categoryFilter">Filter by Category:</label>
+          <select
+            id="categoryFilter"
+            value={selectedCategory}
+            onChange={handleCategoryChange}
+          >
+            <option value="">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="button-group" style={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "20px" }}>
           <button
             type="button"

@@ -11,33 +11,55 @@ export default function EditProductForm() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    authFetch(`http://localhost:8000/products/${id}/`)
-      .then((data) => {
-        setName(data.name);
-        setPrice(data.price);
-        setDescription(data.description);
+    async function fetchProductAndCategories() {
+      try {
+        const [productData, categoriesData] = await Promise.all([
+          authFetch(`http://localhost:8000/products/${id}/`),
+          authFetch("http://localhost:8000/categories/"),
+        ]);
+        setName(productData.name);
+        setPrice(productData.price);
+        setDescription(productData.description || "");
+        setCategoryId(productData.category?.id || "");
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
         setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load product");
-        navigate("/products");
-      });
+      } catch (error) {
+        console.error("Fetch error:", error);
+        setError("Failed to load product: " + (error.response?.data ? Object.values(error.response.data).flat().join(" ") : error.message));
+        setTimeout(() => navigate("/products"), 1000);
+      }
+    }
+    fetchProductAndCategories();
   }, [id, navigate, authFetch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); 
+    setError("");
     setSuccess("");
+
+    if (!name || !price) {
+      setError("Name and price are required");
+      return;
+    }
+
+    const priceNum = Number(price);
+    if (priceNum <= 0) {
+      setError("Price must be positive");
+      return;
+    }
 
     const updatedProduct = {
       name,
-      price,
+      price: priceNum,
       description,
+      category: categoryId || null, 
     };
 
     try {
@@ -48,13 +70,14 @@ export default function EditProductForm() {
         },
         body: JSON.stringify(updatedProduct),
       });
-      setError(""); 
       setSuccess("Product edited successfully!");
-      setTimeout(() => {
-        navigate("/products");
-      }, 1000);
-    } catch {
-      setError("Failed to update product");
+      setTimeout(() => navigate("/products"), 1000);
+    } catch (error) {
+      console.error("API error:", error);
+      const errorMessage = error.response?.data
+        ? Object.values(error.response.data).flat().join(" ")
+        : error.message;
+      setError("Failed to update product: " + errorMessage);
     }
   };
 
@@ -87,6 +110,21 @@ export default function EditProductForm() {
               onChange={(e) => setPrice(e.target.value)}
               required
             />
+          </div>
+          <div className="form-group">
+            <label htmlFor="category">Category:</label>
+            <select
+              id="category"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
+              <option value="">No Category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label htmlFor="description">Description:</label>

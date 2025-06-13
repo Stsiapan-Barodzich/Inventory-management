@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
 import ErrorMessage from "../SharedComponents/ErrorMessage";
@@ -7,17 +7,49 @@ export default function AddProductForm() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const navigate = useNavigate();
   const authFetch = useAuthFetch();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const data = await authFetch("http://localhost:8000/categories/");
+        console.log("Fetched categories:", data);
+        setCategories(Array.isArray(data) ? data : []);
+      } catch (error) {
+        setError("Failed to load categories: " + error.message);
+        console.error("Fetch error:", error);
+      }
+    }
+    fetchCategories();
+  }, [authFetch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); 
+    setError("");
     setSuccess("");
 
-    const newProduct = { name, price, description };
+    if (!name || !price) {
+      setError("Name and price are required");
+      return;
+    }
+
+    const priceNum = Number(price);
+    if (priceNum <= 0) {
+      setError("Price must be positive");
+      return;
+    }
+
+    const newProduct = {
+      name,
+      price: priceNum,
+      description,
+      category: categoryId || null, 
+    };
 
     try {
       await authFetch("http://localhost:8000/products/", {
@@ -27,13 +59,20 @@ export default function AddProductForm() {
         },
         body: JSON.stringify(newProduct),
       });
-      setError(""); 
       setSuccess("Product added successfully!");
+      setName("");
+      setPrice("");
+      setDescription("");
+      setCategoryId("");
       setTimeout(() => {
         navigate("/products");
       }, 1000);
-    } catch {
-      setError("Failed to add product.");
+    } catch (error) {
+      console.error("API error:", error);
+      const errorMessage = error.response?.data
+        ? Object.values(error.response.data).flat().join(" ")
+        : error.message;
+      setError("Failed to add product: " + errorMessage);
     }
   };
 
@@ -64,6 +103,21 @@ export default function AddProductForm() {
               onChange={(e) => setPrice(e.target.value)}
               required
             />
+          </div>
+          <div className="form-group">
+            <label htmlFor="category">Category:</label>
+            <select
+              id="category"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+            >
+              <option value="">No Category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label htmlFor="description">Description:</label>
