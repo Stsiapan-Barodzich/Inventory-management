@@ -14,8 +14,9 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from main.models import Product, ProductStock, TransferLog, Warehouse
+from main.models import Category, Product, ProductStock, TransferLog, Warehouse
 from main.serializers import (
+    CategorySerializer,
     LoginSerializer,
     ProductSerializer,
     ProductStockReadSerializer,
@@ -73,6 +74,13 @@ class ProductViewSet(ModelViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self) -> QuerySet:
+        queryset = super().get_queryset()
+        category = self.request.query_params.get("category", None)
+        if category:
+            queryset = queryset.filter(category__name=category)
+        return queryset
+
 
 class ProductStockViewSet(ModelViewSet):
     queryset = ProductStock.objects.all()
@@ -87,9 +95,12 @@ class ProductStockViewSet(ModelViewSet):
 
     def get_queryset(self) -> QuerySet:
         qs = super().get_queryset()
-        if self.request.user.is_superuser:
-            return qs
-        return qs.filter(warehouse__users=self.request.user)
+        category = self.request.query_params.get("category", None)
+        if category:
+            qs = qs.filter(product__category__name=category)
+        if not self.request.user.is_superuser:
+            qs = qs.filter(warehouse__users=self.request.user)
+        return qs
 
     def perform_create(self, serializer: BaseSerializer) -> None:
         product = serializer.validated_data["product"]
@@ -98,7 +109,7 @@ class ProductStockViewSet(ModelViewSet):
         user = cast(User, self.request.user)
 
         if not user.is_superuser and not warehouse.users.filter(id=user.id).exists():
-            raise PermissionDenied("Только владелец склада может добавлять продукты.")
+            raise PermissionDenied("You can add products only to your warehouses")
 
         existing = ProductStock.objects.filter(product=product, warehouse=warehouse).first()
         if existing:
@@ -129,31 +140,27 @@ class ProductStockViewSet(ModelViewSet):
         quantity = request.data.get("quantity")
         user = cast(User, self.request.user)
 
-        # Проверка, что все параметры предоставлены
         if not all([product_id, from_warehouse_id, to_warehouse_id, quantity]):
-            raise ValidationError("Необходимо указать product_id, from_warehouse_id, to_warehouse_id и quantity.")
+            raise ValidationError("Need product_id, from_warehouse_id, to_warehouse_id and quantity.")
 
-        # Проверка типов и валидности quantity
         if quantity is None:
-            raise ValidationError("Количество не указано.")
+            raise ValidationError("Need count.")
         try:
             quantity = int(quantity)
             if quantity <= 0:
-                raise ValidationError("Количество должно быть положительным.")
+                raise ValidationError("The quantity must be positive.")
         except (TypeError, ValueError):
-            raise ValidationError("Количество должно быть числом.")
+            raise ValidationError("The quantity must be number.")
 
-        # Проверка типов и валидности ID
         if product_id is None or from_warehouse_id is None or to_warehouse_id is None:
-            raise ValidationError("ID продукта или складов не указаны.")
+            raise ValidationError("No product or warehouse IDs provided.")
         try:
             product_id = int(product_id)
             from_warehouse_id = int(from_warehouse_id)
             to_warehouse_id = int(to_warehouse_id)
         except (TypeError, ValueError):
-            raise ValidationError("ID продукта или складов должны быть числами.")
+            raise ValidationError("Product or warehouse IDs must be numbers.")
 
-        # Получение объектов
         try:
             product: Product = Product.objects.get(id=product_id)
             from_warehouse: Warehouse = Warehouse.objects.get(id=from_warehouse_id)
@@ -163,19 +170,16 @@ class ProductStockViewSet(ModelViewSet):
         except Warehouse.DoesNotExist:
             raise ValidationError("Warehouse not found.")
 
-        # Проверка прав доступа
         if not user.is_superuser:
             if not from_warehouse.users.filter(id=user.id).exists():
-                raise PermissionDenied("У вас нет доступа к исходному складу.")
+                raise PermissionDenied("You do not have access to the original warehouse.")
             if not to_warehouse.users.filter(id=user.id).exists():
-                raise PermissionDenied("У вас нет доступа к целевому складу.")
+                raise PermissionDenied("You do not have access to the target warehouse.")
 
-        # Проверка наличия товара
         from_stock = ProductStock.objects.filter(product=product, warehouse=from_warehouse).first()
         if not from_stock or from_stock.quantity < quantity:
-            raise ValidationError("Недостаточно товара на исходном складе.")
+            raise ValidationError("Not enough product in original warehouse.")
 
-        # Обновление запасов
         from_stock.quantity -= quantity
         if from_stock.quantity == 0:
             from_stock.delete()
@@ -189,7 +193,6 @@ class ProductStockViewSet(ModelViewSet):
         else:
             ProductStock.objects.create(product=product, warehouse=to_warehouse, quantity=quantity)
 
-        # Создание лога перевода
         TransferLog.objects.create(
             product=product,
             from_warehouse=from_warehouse,
@@ -198,12 +201,11 @@ class ProductStockViewSet(ModelViewSet):
             transferred_by=user,
         )
 
-        # Возврат обновлённых запасов
         updated_stocks = ProductStock.objects.filter(product=product, warehouse__in=[from_warehouse, to_warehouse])
         serializer = ProductStockReadSerializer(updated_stocks, many=True)
         return Response(
             {
-                "message": "Товар успешно переведен.",
+                "message": "The item has been successfully transferred.",
                 "stocks": serializer.data,
             },
             status=status.HTTP_200_OK,
@@ -257,3 +259,8 @@ class TransferLogViewSet(ModelViewSet):
             return super().get_queryset()
         user = cast(User, self.request.user)
         return super().get_queryset().filter(transferred_by=user)
+
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer

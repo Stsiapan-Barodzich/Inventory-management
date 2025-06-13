@@ -5,7 +5,14 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from main.models import Product, ProductStock, TransferLog, Warehouse
+from main.models import Category, Product, ProductStock, TransferLog, Warehouse
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name"]
+        read_only_fields = ["id"]
 
 
 class UserSerializer(serializers.ModelSerializer):
