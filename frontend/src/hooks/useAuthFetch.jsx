@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAuth } from "../Contexts/AuthContext";
+import { useAuth } from "@Contexts/AuthContext";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

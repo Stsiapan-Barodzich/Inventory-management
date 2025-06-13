@@ -1,16 +1,28 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useAuthFetch } from "../../hooks/useAuthFetch";
+import { useAuthFetch } from "@hooks/useAuthFetch";
 import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function AddProductForm() {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState<number>(0);
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const {
+    register,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: {
+      name: "",
+      price: "",
+      description: "",
+      category: "",
+    },
+  });
+
   const navigate = useNavigate();
   const authFetch = useAuthFetch();
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [categories, setCategories] = useState([]);
 
@@ -21,34 +33,25 @@ export default function AddProductForm() {
         console.log("Fetched categories:", data);
         setCategories(Array.isArray(data) ? data : []);
       } catch (error) {
-        setError("Failed to load categories: " + error.message);
+        setError("root", {
+          type: "manual",
+          message: "Failed to load categories: " + error.message,
+        });
         console.error("Fetch error:", error);
       }
     }
     fetchCategories();
-  }, [authFetch]);
+  }, [authFetch, setError]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  const onSubmit = async (data) => {
+    clearErrors();
     setSuccess("");
 
-    if (!name || !price) {
-      setError("Name and price are required");
-      return;
-    }
-
-    const priceNum = Number(price);
-    if (priceNum <= 0) {
-      setError("Price must be positive");
-      return;
-    }
-
     const newProduct = {
-      name,
-      price: priceNum,
-      description,
-      category: categoryId || null, 
+      name: data.name,
+      price: data.price,
+      description: data.description,
+      category: data.category || null,
     };
 
     try {
@@ -59,11 +62,9 @@ export default function AddProductForm() {
         },
         body: JSON.stringify(newProduct),
       });
+
       setSuccess("Product added successfully!");
-      setName("");
-      setPrice("");
-      setDescription("");
-      setCategoryId("");
+      reset();
       setTimeout(() => {
         navigate("/products");
       }, 1000);
@@ -72,26 +73,28 @@ export default function AddProductForm() {
       const errorMessage = error.response?.data
         ? Object.values(error.response.data).flat().join(" ")
         : error.message;
-      setError("Failed to add product: " + errorMessage);
+      setError("root", {
+        type: "manual",
+        message: "Failed to add product: " + errorMessage,
+      });
     }
   };
 
   return (
     <div className="container fade-in">
-      {error && <ErrorMessage message={error} />}
+      {errors.root && <ErrorMessage message={errors.root.message} />}
       {success && <ErrorMessage message={success} />}
       <div className="card">
         <h2>Add Product</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="form-group">
             <label htmlFor="name">Name:</label>
             <input
               type="text"
               id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              {...register("name", { required: "Name is required" })}
             />
+            {errors.name && <ErrorMessage message={errors.name.message} />}
           </div>
           <div className="form-group">
             <label htmlFor="price">Price:</label>
@@ -99,18 +102,16 @@ export default function AddProductForm() {
               type="number"
               step="0.01"
               id="price"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
+              {...register("price", {
+                required: "Price is required",
+                min: { value: 0.01, message: "Price must be positive" },
+              })}
             />
+            {errors.price && <ErrorMessage message={errors.price.message} />}
           </div>
           <div className="form-group">
             <label htmlFor="category">Category:</label>
-            <select
-              id="category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-            >
+            <select id="category" {...register("category")}>
               <option value="">No Category</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -121,11 +122,7 @@ export default function AddProductForm() {
           </div>
           <div className="form-group">
             <label htmlFor="description">Description:</label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <textarea id="description" {...register("description")} />
           </div>
           <button type="submit" className="btn btn-success">
             Add
