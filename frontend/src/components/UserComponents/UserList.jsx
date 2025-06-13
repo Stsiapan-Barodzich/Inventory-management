@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuthFetch } from "../../hooks/useAuthFetch";
+import { useAuthFetch } from "@hooks/useAuthFetch";
 
 export default function UserList() {
   const [users, setUsers] = useState([]);

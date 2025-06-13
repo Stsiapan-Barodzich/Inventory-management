@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../Contexts/AuthContext';
-import {useAuthFetch} from '../../hooks/useAuthFetch';
+import { useAuth } from '@Contexts/AuthContext';
+import {useAuthFetch} from '@hooks/useAuthFetch';
 
 const Logout = () => {
   const { setAuthTokens, setIsAuthenticated } = useContext(useAuth);
