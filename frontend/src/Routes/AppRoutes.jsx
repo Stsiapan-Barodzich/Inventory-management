@@ -16,7 +16,9 @@ import UserDetail from '../components/UserComponents/UserDetail.jsx';
 import AddUserForm from '../components/UserComponents/AddUserForm.jsx';
 import EditUserForm from '../components/UserComponents/EditUserForm.jsx';
 import AddProductStockForm from '../components/ProductStockComponents/AddProductStockForm.jsx';
-
+import TransferProductForm from '../components/TransferComponents/TransferProductForm.jsx';
+import TransferLogList from '../components/TransferComponents/TransferLogList.jsx';
+import ProductStockList from '../components/ProductStockComponents/ProductStockList.jsx';
 function AppRoutes() {
   return (
     <>
@@ -39,7 +41,10 @@ function AppRoutes() {
           <Route path="/users/:id" element={<UserDetail />} />
           <Route path="/users/add" element={<AddUserForm />} />
           <Route path="/users/edit/:id" element={<EditUserForm />} />
-          <Route path="/product-stocks" element={<AddProductStockForm />} />
+          <Route path="/product-stocks" element={<ProductStockList />} />
+          <Route path="/add-product-stock" element={<AddProductStockForm />} />
+          <Route path="/transfer" element={<TransferProductForm />} />
+          <Route path="/transfer-logs" element={<TransferLogList />} />
         </Route>
       </Route>
     </>
