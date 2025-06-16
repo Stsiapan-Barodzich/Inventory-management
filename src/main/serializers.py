@@ -44,12 +44,17 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
-    users = UserSerializer(many=True, read_only=True)
+    users = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=True, required=False)
 
     class Meta:
         model = Warehouse
-        fields = "__all__"
+        fields = ["id", "name", "location", "users"]
         read_only_fields = ["id"]
+
+    def to_representation(self, instance: Warehouse) -> dict[str, Any]:
+        representation = super().to_representation(instance)
+        representation["users"] = UserSerializer(instance.users.all(), many=True).data
+        return representation
 
 
 class ProductStockReadSerializer(serializers.ModelSerializer):

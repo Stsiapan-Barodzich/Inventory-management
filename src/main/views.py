@@ -1,7 +1,11 @@
+import logging
 from typing import Sequence, cast
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import QuerySet
+from django.template.loader import render_to_string
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -25,6 +29,8 @@ from main.serializers import (
     UserSerializer,
     WarehouseSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class WarehouseViewSet(ModelViewSet):
@@ -88,6 +94,43 @@ class ProductStockViewSet(ModelViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = [IsAuthenticated]
 
+    def send_stock_notification(self, product_stock: ProductStock) -> None:
+        if product_stock.quantity >= 5:
+            return
+
+        context = {
+            "product": product_stock.product,
+            "warehouse": product_stock.warehouse,
+            "quantity": product_stock.quantity,
+            "threshold": 5,
+        }
+
+        subject = f"Low stock alert: {product_stock.product.name}"
+        text_message = (
+            f"Product: {product_stock.product.name}\n"
+            f"Warehouse: {product_stock.warehouse.name}\n"
+            f"Current stock: {product_stock.quantity} units\n\n"
+            f"Please restock soon!"
+        )
+        html_message = render_to_string("emails/low_stock_alert.html", context)
+
+        recipients = list(product_stock.warehouse.users.all().values_list("email", flat=True))
+        if not recipients:
+            if hasattr(settings, "ADMIN_EMAIL") and settings.ADMIN_EMAIL:
+                recipients = [settings.ADMIN_EMAIL]
+            else:
+                logger.warning(f"No recipients found for low stock notification of {product_stock.product.name}")
+                return
+
+        try:
+            email = EmailMultiAlternatives(
+                subject=subject, body=text_message, from_email=settings.DEFAULT_FROM_EMAIL, to=recipients
+            )
+            email.attach_alternative(html_message, "text/html")
+            email.send()
+        except Exception as e:
+            logger.error(f"Failed to send low stock notification: {str(e)}")
+
     def get_serializer_class(self) -> type[BaseSerializer]:
         if self.action == "list" or self.action == "retrieve":
             return ProductStockReadSerializer
@@ -115,6 +158,7 @@ class ProductStockViewSet(ModelViewSet):
         if existing:
             existing.quantity += quantity
             existing.save()
+            self.send_stock_notification(existing)
             TransferLog.objects.create(
                 product=product,
                 from_warehouse=None,
@@ -123,7 +167,8 @@ class ProductStockViewSet(ModelViewSet):
                 transferred_by=user,
             )
         else:
-            serializer.save()
+            product_stock = serializer.save()
+            self.send_stock_notification(product_stock)
             TransferLog.objects.create(
                 product=product,
                 from_warehouse=None,
@@ -185,13 +230,16 @@ class ProductStockViewSet(ModelViewSet):
             from_stock.delete()
         else:
             from_stock.save()
+            self.send_stock_notification(from_stock)
 
         to_stock = ProductStock.objects.filter(product=product, warehouse=to_warehouse).first()
         if to_stock:
             to_stock.quantity += quantity
             to_stock.save()
+            self.send_stock_notification(to_stock)
         else:
-            ProductStock.objects.create(product=product, warehouse=to_warehouse, quantity=quantity)
+            to_stock = ProductStock.objects.create(product=product, warehouse=to_warehouse, quantity=quantity)
+            self.send_stock_notification(to_stock)
 
         TransferLog.objects.create(
             product=product,
