@@ -45,7 +45,7 @@ export default function ProductDetail() {
         <p><strong>Price:</strong> {product.price}</p>
         <p><strong>Description:</strong> {product.description}</p>
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button className="btn btn-primary" onClick={() => navigate(`/products/edit/${id}`)}>
+          <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => navigate(`/products/edit/${id}`)}>
             Edit
           </button>
           <button className="btn btn-danger" onClick={handleDelete}>

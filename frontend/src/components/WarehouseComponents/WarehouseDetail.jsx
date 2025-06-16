@@ -64,14 +64,14 @@ export default function WarehouseDetail() {
             <ul>
               {products.map((p) => (
                 <li key={p.id || p.product_name}>
-                  {p.product_name} — {p.quantity}
+                  {p.product.name} — {p.quantity}
                 </li>
               ))}
             </ul>
           )}
         </div>
         <div style={{ marginTop: "20px" }}>
-          <h3>Warehouse owners:</h3>
+          <h3>Warehouse users:</h3>
           {warehouse.users && warehouse.users.length > 0 ? (
             <ul>
               {warehouse.users.map((user) => (
@@ -81,7 +81,7 @@ export default function WarehouseDetail() {
               ))}
             </ul>
           ) : (
-            <p>No owners assigned to this warehouse</p>
+            <p>No users assigned to this warehouse</p>
           )}
         </div>
 
