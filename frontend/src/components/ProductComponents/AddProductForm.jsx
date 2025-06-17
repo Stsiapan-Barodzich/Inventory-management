@@ -5,7 +5,7 @@ import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function AddProductForm() {
   const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState<number>(0);
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const navigate = useNavigate();
