@@ -15,7 +15,7 @@ export default function AddWarehouseForm() {
 
 
   useEffect(() => {
-    authFetch("http://localhost:8000/users/")
+    authFetch("/users/")
       .then(setUsers)
       .catch((err) => {
         console.error("Failed to load users:", err);
@@ -35,7 +35,7 @@ export default function AddWarehouseForm() {
     };
 
     try {
-      await authFetch("http://localhost:8000/warehouses/", {
+      await authFetch("/warehouses/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

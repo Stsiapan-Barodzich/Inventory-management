@@ -16,10 +16,10 @@ export default function WarehouseDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const warehouseData = await authFetch(`http://localhost:8000/warehouses/${id}/`);
+        const warehouseData = await authFetch(`/warehouses/${id}/`);
         setWarehouse(warehouseData);
 
-        const productData = await authFetch(`http://localhost:8000/warehouses/${id}/products/`);
+        const productData = await authFetch(`/warehouses/${id}/products/`);
         setProducts(productData);
 
         setLoading(false);
@@ -37,7 +37,7 @@ export default function WarehouseDetail() {
     if (!window.confirm("Are you sure you want to delete this warehouse?")) return;
 
     try {
-      await authFetch(`http://localhost:8000/warehouses/${id}/`, {
+      await authFetch(`/warehouses/${id}/`, {
         method: "DELETE",
       });
       setError("");
@@ -63,7 +63,8 @@ export default function WarehouseDetail() {
           ) : (
             <ul>
               {products.map((p) => (
-                <li key={p.id || p.product_name}>
+                <li key={p.id || p.product.name}>
+
                   {p.product.name} — {p.quantity}
                 </li>
               ))}

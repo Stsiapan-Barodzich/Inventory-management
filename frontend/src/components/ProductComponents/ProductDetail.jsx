@@ -15,17 +15,18 @@ export default function ProductDetail() {
   useEffect(() => {
     async function fetchProductData() {
       try {
-        const productData = await authFetch(`http://localhost:8000/products/${id}/`);
+        const productData = await authFetch(`/products/${id}/`);
         setProduct(productData);
         
         // Если у продукта есть категория, загружаем её данные
         if (productData.category) {
-          const categoryData = await authFetch(`http://localhost:8000/categories/${productData.category}/`);
+          const categoryData = await authFetch(`/categories/${productData.category}/`);
           setCategory(categoryData);
         }
         
         setLoading(false);
       } catch (err) {
+
         setError("Failed to load product");
         navigate("/products");
       }
@@ -37,7 +38,7 @@ export default function ProductDetail() {
   const handleDelete = () => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
-    authFetch(`http://localhost:8000/products/${id}/`, { method: "DELETE" })
+    authFetch(`/products/${id}/`, { method: "DELETE" })
       .then(() => {
         setError(""); 
         navigate("/products");

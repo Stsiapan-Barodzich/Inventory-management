@@ -21,8 +21,8 @@ export default function EditProductForm() {
     async function fetchProductAndCategories() {
       try {
         const [productData, categoriesData] = await Promise.all([
-          authFetch(`http://localhost:8000/products/${id}/`),
-          authFetch("http://localhost:8000/categories/"),
+          authFetch(`/products/${id}/`),
+          authFetch("/categories/"),
         ]);
         
         console.log("Product data:", productData);
@@ -72,7 +72,7 @@ export default function EditProductForm() {
     };
 
     try {
-      await authFetch(`http://localhost:8000/products/${id}/`, {
+      await authFetch(`/products/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

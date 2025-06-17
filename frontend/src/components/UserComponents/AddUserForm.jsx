@@ -21,7 +21,7 @@ export default function AddUserForm() {
     const newUser = { username, email, password };
 
     try {
-      await authFetch("http://localhost:8000/users/", {
+      await authFetch("/users/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

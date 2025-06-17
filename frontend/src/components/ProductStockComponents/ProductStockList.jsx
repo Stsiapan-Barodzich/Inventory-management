@@ -17,8 +17,8 @@ export default function ProductStockList() {
       try {
         setIsLoading(true);
         const [stocksData, categoriesData] = await Promise.all([
-          authFetch(`http://localhost:8000/product-stocks/?category=${selectedCategory || ""}`),
-          authFetch("http://localhost:8000/categories/"),
+          authFetch(`/product-stocks/?category=${selectedCategory || ""}`),
+          authFetch("/categories/"),
         ]);
         console.log("Fetched stocks:", stocksData);
         console.log("Fetched categories:", categoriesData);
