@@ -14,8 +14,7 @@ export default function ProductStockList() {
     async function fetchStocks() {
       try {
         setIsLoading(true);
-        const data = await authFetch("http://localhost:8000/product-stocks/");
-        console.log("Fetched stocks:", data);
+        const data = await authFetch("/product-stocks/");
         setStocks(Array.isArray(data) ? data : []);
       } catch (error) {
         setError("Failed to load stocks: " + error.message);

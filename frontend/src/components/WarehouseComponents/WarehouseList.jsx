@@ -7,9 +7,8 @@ export default function WarehouseList() {
   const authFetch = useAuthFetch();
 
   useEffect(() => {
-    authFetch("http://localhost:8000/warehouses/")
+    authFetch("/warehouses/")
       .then((data) => {
-        console.log("Warehouses from API:", data);
 
         if (Array.isArray(data)) {
           setWarehouses(data);

@@ -19,8 +19,8 @@ export default function TransferProductForm() {
     async function fetchData() {
       try {
         const [warehousesData, productsData] = await Promise.all([
-          authFetch("http://localhost:8000/warehouses/"),
-          authFetch("http://localhost:8000/products/"),
+          authFetch("/warehouses/"),
+          authFetch("/products/"),
         ]);
         setWarehouses(warehousesData);
         setProducts(productsData);
@@ -36,17 +36,14 @@ export default function TransferProductForm() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    console.log("Submitting:", { selectedProduct, fromWarehouse, toWarehouse, quantity });
 
     if (!selectedProduct || !fromWarehouse || !toWarehouse || !quantity) {
       setError("Please fill in all fields");
-      console.log("Validation failed");
       return;
     }
 
     if (fromWarehouse === toWarehouse) {
       setError("Source and destination warehouses cannot be the same");
-      console.log("Warehouse validation failed");
       return;
     }
 
@@ -58,8 +55,7 @@ export default function TransferProductForm() {
     };
 
     try {
-      console.log("Sending request with:", transferData);
-      const response = await authFetch("http://localhost:8000/product-stocks/transfer/", {
+      const response = await authFetch("/product-stocks/transfer/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

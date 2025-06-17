@@ -12,8 +12,7 @@ export default function TransferLogList() {
     async function fetchLogs() {
       try {
         setIsLoading(true);
-        const data = await authFetch("http://localhost:8000/transfer-logs/");
-        console.log("Fetched transfer logs:", data);
+        const data = await authFetch("/transfer-logs/");
         setLogs(Array.isArray(data) ? data : []);
       } catch (error) {
         setError("Failed to load transfer logs: " + error.message);

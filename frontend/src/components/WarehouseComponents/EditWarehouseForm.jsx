@@ -21,12 +21,12 @@ export default function EditWarehouseForm() {
     // Загрузка склада и списка всех пользователей
     const fetchData = async () => {
       try {
-        const warehouse = await authFetch(`http://localhost:8000/warehouses/${id}/`);
+        const warehouse = await authFetch(`/warehouses/${id}/`);
         setName(warehouse.name);
         setLocation(warehouse.location);
         setSelectedUsers(warehouse.users || []); // <- user IDs
 
-        const usersData = await authFetch(`http://localhost:8000/users/`);
+        const usersData = await authFetch(`/users/`);
         setUsers(usersData);
         setLoading(false);
       } catch (err) {
@@ -51,7 +51,7 @@ export default function EditWarehouseForm() {
     };
 
     try {
-      await authFetch(`http://localhost:8000/warehouses/${id}/`, {
+      await authFetch(`/warehouses/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

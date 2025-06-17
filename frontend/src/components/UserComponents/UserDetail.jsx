@@ -13,7 +13,7 @@ export default function UserDetail() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    authFetch(`http://localhost:8000/users/${id}/`)
+    authFetch(`/users/${id}/`)
       .then((data) => {
         setUser(data);
         setLoading(false);
@@ -29,10 +29,10 @@ export default function UserDetail() {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      await authFetch(`http://localhost:8000/users/${id}/`, {
+      await authFetch(`/users/${id}/`, {
         method: "DELETE",
       });
-      setError(""); // Сброс ошибки при успехе
+      setError(""); 
       navigate("/users");
     } catch (err) {
       setError("Error deleting user: " + err.message);

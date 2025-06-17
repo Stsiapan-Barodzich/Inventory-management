@@ -15,7 +15,7 @@ export default function EditUserForm() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    authFetch(`http://localhost:8000/users/${id}/`)
+    authFetch(`/users/${id}/`)
       .then((data) => {
         setUsername(data.username || "");
         setEmail(data.email || "");
@@ -36,7 +36,7 @@ export default function EditUserForm() {
 
     try {
       console.log("Sending PATCH request for user ID:", id);
-      const response = await authFetch(`http://localhost:8000/users/${id}/`, {
+      const response = await authFetch(`/users/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

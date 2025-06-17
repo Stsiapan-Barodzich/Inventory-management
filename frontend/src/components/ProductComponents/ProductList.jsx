@@ -9,7 +9,7 @@ export default function ProductList() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const data = await authFetch("http://localhost:8000/products/");
+        const data = await authFetch("/products/");
         setProducts(data);
       } catch (error) {
         console.error("Error loading products:", error);
