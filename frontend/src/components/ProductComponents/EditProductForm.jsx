@@ -9,7 +9,7 @@ export default function EditProductForm() {
   const authFetch = useAuthFetch();
 
   const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState<number>(0);
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState(null); // Изменено на null
   const [loading, setLoading] = useState(true);
