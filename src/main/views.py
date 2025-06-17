@@ -1,10 +1,10 @@
-from typing import Sequence, cast
+from typing import Any, Sequence, Type, cast
 
 from django.contrib.auth.models import User
+from django.db import transaction
 from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -20,6 +20,7 @@ from main.serializers import (
     ProductSerializer,
     ProductStockReadSerializer,
     ProductStockSerializer,
+    ProductTransferSerializer,
     TransferLogSerializer,
     UserSerializer,
     WarehouseSerializer,
@@ -80,133 +81,92 @@ class ProductStockViewSet(ModelViewSet):
     authentication_classes = (JWTAuthentication,)
     permission_classes = [IsAuthenticated]
 
-    def get_serializer_class(self) -> type[BaseSerializer]:
-        if self.action == "list" or self.action == "retrieve":
+    def get_serializer_class(self) -> Type[BaseSerializer]:
+        if self.action in ["list", "retrieve"]:
             return ProductStockReadSerializer
+        if self.action == "transfer":
+            return ProductTransferSerializer
         return ProductStockSerializer
 
     def get_queryset(self) -> QuerySet:
         qs = super().get_queryset()
-        if self.request.user.is_superuser:
-            return qs
-        return qs.filter(warehouse__users=self.request.user)
+        if not self.request.user.is_superuser:
+            qs = qs.filter(warehouse__users=self.request.user)
+        return qs
 
-    def perform_create(self, serializer: BaseSerializer) -> None:
-        product = serializer.validated_data["product"]
-        warehouse = serializer.validated_data["warehouse"]
-        quantity = serializer.validated_data["quantity"]
-        user = cast(User, self.request.user)
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        if not user.is_superuser and not warehouse.users.filter(id=user.id).exists():
-            raise PermissionDenied("Только владелец склада может добавлять продукты.")
+        data = serializer.validated_data
+        product = data["product"]
+        warehouse = data["warehouse"]
+        quantity = data["quantity"]
 
-        existing = ProductStock.objects.filter(product=product, warehouse=warehouse).first()
-        if existing:
-            existing.quantity += quantity
-            existing.save()
-            TransferLog.objects.create(
-                product=product,
-                from_warehouse=None,
-                to_warehouse=warehouse,
-                quantity=quantity,
-                transferred_by=user,
-            )
-        else:
-            serializer.save()
-            TransferLog.objects.create(
-                product=product,
-                from_warehouse=None,
-                to_warehouse=warehouse,
-                quantity=quantity,
-                transferred_by=user,
-            )
+        stock, created = ProductStock.objects.get_or_create(
+            product=product, warehouse=warehouse, defaults={"quantity": quantity}
+        )
+
+        if not created:
+            stock.quantity += quantity
+            stock.save()
+            serializer = self.get_serializer(stock)
+
+        TransferLog.objects.create(
+            product=product,
+            from_warehouse=None,
+            to_warehouse=warehouse,
+            quantity=quantity,
+            transferred_by=cast(User, request.user),
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
     @action(detail=False, methods=["post"], url_path="transfer")
     def transfer(self, request: Request) -> Response:
-        product_id = request.data.get("product_id")
-        from_warehouse_id = request.data.get("from_warehouse_id")
-        to_warehouse_id = request.data.get("to_warehouse_id")
-        quantity = request.data.get("quantity")
-        user = cast(User, self.request.user)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        # Проверка, что все параметры предоставлены
-        if not all([product_id, from_warehouse_id, to_warehouse_id, quantity]):
-            raise ValidationError("Необходимо указать product_id, from_warehouse_id, to_warehouse_id и quantity.")
+        data = serializer.validated_data
+        product = data["product_id"]
+        from_warehouse = data.get("from_warehouse_id")
+        to_warehouse = data["to_warehouse_id"]
+        quantity = data["quantity"]
 
-        # Проверка типов и валидности quantity
-        if quantity is None:
-            raise ValidationError("Количество не указано.")
-        try:
-            quantity = int(quantity)
-            if quantity <= 0:
-                raise ValidationError("Количество должно быть положительным.")
-        except (TypeError, ValueError):
-            raise ValidationError("Количество должно быть числом.")
+        with transaction.atomic():
+            if from_warehouse:
+                from_stock = ProductStock.objects.select_for_update().get(product=product, warehouse=from_warehouse)
+                from_stock.quantity -= quantity
+                if from_stock.quantity == 0:
+                    from_stock.delete()
+                else:
+                    from_stock.save()
 
-        # Проверка типов и валидности ID
-        if product_id is None or from_warehouse_id is None or to_warehouse_id is None:
-            raise ValidationError("ID продукта или складов не указаны.")
-        try:
-            product_id = int(product_id)
-            from_warehouse_id = int(from_warehouse_id)
-            to_warehouse_id = int(to_warehouse_id)
-        except (TypeError, ValueError):
-            raise ValidationError("ID продукта или складов должны быть числами.")
+            to_stock, created = ProductStock.objects.get_or_create(
+                product=product, warehouse=to_warehouse, defaults={"quantity": quantity}
+            )
+            if not created:
+                to_stock.quantity += quantity
+                to_stock.save()
 
-        # Получение объектов
-        try:
-            product: Product = Product.objects.get(id=product_id)
-            from_warehouse: Warehouse = Warehouse.objects.get(id=from_warehouse_id)
-            to_warehouse: Warehouse = Warehouse.objects.get(id=to_warehouse_id)
-        except Product.DoesNotExist:
-            raise ValidationError("Product not found.")
-        except Warehouse.DoesNotExist:
-            raise ValidationError("Warehouse not found.")
+            TransferLog.objects.create(
+                product=product,
+                from_warehouse=from_warehouse,
+                to_warehouse=to_warehouse,
+                quantity=quantity,
+                transferred_by=cast(User, request.user),
+            )
 
-        # Проверка прав доступа
-        if not user.is_superuser:
-            if not from_warehouse.users.filter(id=user.id).exists():
-                raise PermissionDenied("У вас нет доступа к исходному складу.")
-            if not to_warehouse.users.filter(id=user.id).exists():
-                raise PermissionDenied("У вас нет доступа к целевому складу.")
-
-        # Проверка наличия товара
-        from_stock = ProductStock.objects.filter(product=product, warehouse=from_warehouse).first()
-        if not from_stock or from_stock.quantity < quantity:
-            raise ValidationError("Недостаточно товара на исходном складе.")
-
-        # Обновление запасов
-        from_stock.quantity -= quantity
-        if from_stock.quantity == 0:
-            from_stock.delete()
-        else:
-            from_stock.save()
-
-        to_stock = ProductStock.objects.filter(product=product, warehouse=to_warehouse).first()
-        if to_stock:
-            to_stock.quantity += quantity
-            to_stock.save()
-        else:
-            ProductStock.objects.create(product=product, warehouse=to_warehouse, quantity=quantity)
-
-        # Создание лога перевода
-        TransferLog.objects.create(
-            product=product,
-            from_warehouse=from_warehouse,
-            to_warehouse=to_warehouse,
-            quantity=quantity,
-            transferred_by=user,
-        )
-
-        # Возврат обновлённых запасов
-        updated_stocks = ProductStock.objects.filter(product=product, warehouse__in=[from_warehouse, to_warehouse])
-        serializer = ProductStockReadSerializer(updated_stocks, many=True)
         return Response(
             {
-                "message": "Товар успешно переведен.",
-                "stocks": serializer.data,
-            },
-            status=status.HTTP_200_OK,
+                "message": "Transfered successful",
+                "stocks": ProductStockReadSerializer(
+                    ProductStock.objects.filter(
+                        product=product, warehouse__in=[w for w in [from_warehouse, to_warehouse] if w]
+                    ),
+                    many=True,
+                ).data,
+            }
         )
 
 
