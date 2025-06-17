@@ -20,11 +20,9 @@ export default function AddProductStockForm() {
       try {
         setIsLoading(true);
         const [warehousesData, productsData] = await Promise.all([
-          authFetch("http://localhost:8000/warehouses/"),
-          authFetch("http://localhost:8000/products/"),
+          authFetch("/warehouses/"),
+          authFetch("/products/"),
         ]);
-        console.log("Warehouses data:", warehousesData);
-        console.log("Products data:", productsData);
         setWarehouses(Array.isArray(warehousesData) ? warehousesData : []);
         setProducts(Array.isArray(productsData) ? productsData : []);
       } catch (error) {
@@ -43,18 +41,15 @@ export default function AddProductStockForm() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    console.log("Submitting:", { selectedWarehouseId, selectedProductId, quantity });
 
     if (!selectedWarehouseId || !selectedProductId || !quantity) {
       setError("Please fill in all fields");
-      console.log("Validation failed");
       return;
     }
 
     const quantityNum = Number(quantity);
     if (quantityNum <= 0) {
       setError("Quantity must be positive");
-      console.log("Quantity validation failed");
       return;
     }
 
@@ -65,15 +60,13 @@ export default function AddProductStockForm() {
     };
 
     try {
-      console.log("Sending request with:", newStock);
-      const response = await authFetch("http://localhost:8000/product-stocks/", {
+      const response = await authFetch("/product-stocks/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newStock),
       });
-      console.log("Add stock response:", response);
       setSuccess("Product stock added successfully!");
       setTimeout(() => {
         navigate("/product-stocks");

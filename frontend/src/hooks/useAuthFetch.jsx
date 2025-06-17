@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import { useAuth } from "../Contexts/AuthContext";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export function useAuthFetch() {
   const { authTokens, logout } = useAuth();
 
@@ -16,7 +18,9 @@ export function useAuthFetch() {
         Authorization: `Bearer ${authTokens.access}`,
       };
 
-      const response = await fetch(url, { ...options, headers });
+      const fullUrl = `${BASE_URL}${url}`;
+
+      const response = await fetch(fullUrl, { ...options, headers });
 
       if (response.status === 401) {
         logout();
@@ -36,7 +40,7 @@ export function useAuthFetch() {
 
       return response;
     },
-    [authTokens, logout] 
+    [authTokens, logout]
   );
 
   return authFetch;

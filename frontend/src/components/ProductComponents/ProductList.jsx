@@ -12,8 +12,8 @@ export default function ProductList() {
     async function fetchData() {
       try {
         const [productsData, categoriesData] = await Promise.all([
-          authFetch(`http://localhost:8000/products/?category=${selectedCategory || ""}`),
-          authFetch("http://localhost:8000/categories/"),
+          authFetch(`/products/?category=${selectedCategory || ""}`),
+          authFetch("/categories/"),
         ]);
         setProducts(Array.isArray(productsData) ? productsData : []);
         setCategories(Array.isArray(categoriesData) ? categoriesData : []);
