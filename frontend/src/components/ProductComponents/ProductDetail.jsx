@@ -26,8 +26,8 @@ export default function ProductDetail() {
         
         setLoading(false);
       } catch (err) {
-
         setError("Failed to load product");
+        setLoading(false);
         navigate("/products");
       }
     }
