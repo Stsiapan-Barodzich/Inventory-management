@@ -11,7 +11,7 @@ export default function EditProductForm() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState(null); // Изменено на null
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -24,10 +24,19 @@ export default function EditProductForm() {
           authFetch(`http://localhost:8000/products/${id}/`),
           authFetch("http://localhost:8000/categories/"),
         ]);
+        
+        console.log("Product data:", productData);
+        console.log("Category data:", productData.category);
+        
         setName(productData.name);
         setPrice(productData.price);
         setDescription(productData.description || "");
-        setCategoryId(productData.category?.id || "");
+        setCategoryId(
+          productData.category !== undefined && productData.category !== null 
+            ? Number(productData.category) 
+            : null
+        );
+        
         setCategories(Array.isArray(categoriesData) ? categoriesData : []);
         setLoading(false);
       } catch (error) {
@@ -59,7 +68,7 @@ export default function EditProductForm() {
       name,
       price: priceNum,
       description,
-      category: categoryId || null, 
+      category: categoryId, 
     };
 
     try {
@@ -115,8 +124,10 @@ export default function EditProductForm() {
             <label htmlFor="category">Category:</label>
             <select
               id="category"
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
+              value={categoryId ?? ""} 
+              onChange={(e) => 
+                setCategoryId(e.target.value !== "" ? Number(e.target.value) : null)
+              }
             >
               <option value="">No Category</option>
               {categories.map((category) => (

@@ -42,7 +42,7 @@ export default function WarehouseList() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Actions</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -52,14 +52,9 @@ export default function WarehouseList() {
                     <Link to={`/warehouses/${warehouse.id}`}>{warehouse.name}</Link>
                   </td>
                   <td>
-                    <Link to={`/warehouses/edit/${warehouse.id}`}>
+                    <Link className="center" to={`/warehouses/edit/${warehouse.id}`}>
                       <button className="btn btn-primary" style={{ marginRight: "10px" }}>
                         Edit
-                      </button>
-                    </Link>
-                    <Link to={`/warehouses/${warehouse.id}`}>
-                      <button className="btn btn-primary">
-                        Details
                       </button>
                     </Link>
                   </td>

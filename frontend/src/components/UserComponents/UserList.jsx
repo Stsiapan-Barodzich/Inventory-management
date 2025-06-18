@@ -25,7 +25,7 @@ export default function UserList() {
             <thead>
               <tr>
                 <th>Username</th>
-                <th>Actions</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -35,16 +35,12 @@ export default function UserList() {
                     <Link to={`/users/${user.id}`}>{user.username}</Link>
                   </td>
                   <td>
-                    <Link to={`/users/edit/${user.id}`}>
+                    <Link className="center" to={`/users/edit/${user.id}`}>
                       <button className="btn btn-primary" style={{ marginRight: "10px" }}>
                         Edit
                       </button>
                     </Link>
-                    <Link to={`/users/${user.id}`}>
-                      <button className="btn btn-primary">
-                        Details
-                      </button>
-                    </Link>
+
                   </td>
                 </tr>
               ))}

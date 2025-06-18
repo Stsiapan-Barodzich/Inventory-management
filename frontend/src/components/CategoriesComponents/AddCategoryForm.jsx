@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthFetch } from "../../hooks/useAuthFetch";
 import ErrorMessage from "../SharedComponents/ErrorMessage";
 
-export default function AddCategoryForm() {
+export default function AddCategoryForm({ onSuccess }) {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -32,6 +32,9 @@ export default function AddCategoryForm() {
       });
       setSuccess("Category added successfully!");
       setName("");
+      if (onSuccess) {
+        onSuccess(); // Закрываем модальное окно
+      }
       setTimeout(() => {
         navigate("/product-stocks");
       }, 1000);
@@ -45,27 +48,25 @@ export default function AddCategoryForm() {
   };
 
   return (
-    <div className="container fade-in">
+    <div className="fade-in">
       {error && <ErrorMessage message={error} />}
       {success && <ErrorMessage message={success} isSuccess={true} />}
-      <div className="card">
-        <h2>Add Category</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Category Name:</label>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="btn btn-success">
-            Add Category
-          </button>
-        </form>
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="name">Category Name:</label>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="form-control"
+          />
+        </div>
+        <button type="submit" className="btn btn-success mt-3">
+          Add Category
+        </button>
+      </form>
     </div>
   );
 }
