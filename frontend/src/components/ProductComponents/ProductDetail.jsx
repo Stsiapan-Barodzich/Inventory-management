@@ -7,19 +7,31 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
+  const [category, setCategory] = useState(null);
   const authFetch = useAuthFetch();
   const [error, setError] = useState("");
-  
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    authFetch(`http://localhost:8000/products/${id}/`)
-      .then((data) => {
-        setProduct(data);
-      })
-      .catch((err) => {
+    async function fetchProductData() {
+      try {
+        const productData = await authFetch(`http://localhost:8000/products/${id}/`);
+        setProduct(productData);
+        
+        // Если у продукта есть категория, загружаем её данные
+        if (productData.category) {
+          const categoryData = await authFetch(`http://localhost:8000/categories/${productData.category}/`);
+          setCategory(categoryData);
+        }
+        
+        setLoading(false);
+      } catch (err) {
         setError("Failed to load product");
         navigate("/products");
-      });
+      }
+    }
+    
+    fetchProductData();
   }, [id, navigate, authFetch]);
 
   const handleDelete = () => {
@@ -35,7 +47,8 @@ export default function ProductDetail() {
       });
   };
 
-  if (!product) return <p className="container fade-in">Loading...</p>;
+  if (loading) return <p className="container fade-in">Loading...</p>;
+  if (!product) return <p className="container fade-in">Product not found</p>;
 
   return (
     <div className="container fade-in">
@@ -43,9 +56,14 @@ export default function ProductDetail() {
       <div className="card">
         <h2>{product.name}</h2>
         <p><strong>Price:</strong> {product.price}</p>
-        <p><strong>Description:</strong> {product.description}</p>
+        <p><strong>Category:</strong> {category ? category.name : "No category"}</p>
+        <p><strong>Description:</strong> {product.description || "No description"}</p>
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button className="btn btn-primary" onClick={() => navigate(`/products/edit/${id}`)}>
+          <button 
+            className="btn btn-primary" 
+            style={{ marginTop: '20px' }} 
+            onClick={() => navigate(`/products/edit/${id}`)}
+          >
             Edit
           </button>
           <button className="btn btn-danger" onClick={handleDelete}>

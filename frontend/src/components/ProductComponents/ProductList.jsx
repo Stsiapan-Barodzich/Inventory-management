@@ -58,7 +58,7 @@ export default function ProductList() {
               <tr>
                 <th>Name</th>
                 <th>Price</th>
-                <th>Actions</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -75,16 +75,12 @@ export default function ProductList() {
                     </Link>
                   </td>
                   <td>
-                    <Link to={`/products/edit/${product.id}`}>
+                    <Link className="center" to={`/products/edit/${product.id}`}>
                       <button className="btn btn-primary" style={{ marginRight: "10px" }}>
                         Edit
                       </button>
                     </Link>
-                    <Link to={`/products/${product.id}`}>
-                      <button className="btn btn-primary">
-                        Details
-                      </button>
-                    </Link>
+
                   </td>
                 </tr>
               ))}

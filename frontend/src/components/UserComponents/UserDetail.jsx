@@ -48,7 +48,7 @@ export default function UserDetail() {
         <h2>{user.username}</h2>
         <p><strong>Email:</strong> {user.email}</p>
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button className="btn btn-primary" onClick={() => navigate(`/users/edit/${id}`)}>
+          <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={() => navigate(`/users/edit/${id}`)}>
             Edit
           </button>
           <button className="btn btn-danger" onClick={handleDelete}>

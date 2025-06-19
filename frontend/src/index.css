@@ -62,6 +62,9 @@ body {
   margin-bottom: 8px;
 }
 
+thead {
+  background-color: #f8f9fa;
+}
 .form-group input,
 .form-group textarea,
 .form-group select {
@@ -86,20 +89,30 @@ body {
   resize: vertical;
 }
 
-/* Buutons*/
+
+.center{
+  display: flex;
+  justify-content: flex-end;   /* выравнивание по правому краю */
+  align-items: center;         /* по вертикали по центру (или flex-start) */
+  vertical-align: top;
+  min-height: 100%;
+}
+/* Buttons*/
 .btn {
-  padding: 12px 20px;
+  
   font-size: 16px;
   font-weight: 500;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.1s ease;
-  margin-bottom: 10px;
+
 }
 
 .btn-primary {
-  width: 100%;
+  padding: 10px 0px 10px 0px;
+  height: 35px;
+  width: 100px;
   background: linear-gradient(90deg, #007bff, #0056b3);
   color: #fff;
 }
@@ -111,15 +124,18 @@ body {
 }
 
 .btn-primary:hover {
+  
   background: linear-gradient(90deg, #0056b3, #003f87);
   transform: translateY(-1px);
 }
 
 .btn-primary:active {
+  
   transform: translateY(0);
 }
 
 .btn-success {
+  padding: 12px 20px;
   background: linear-gradient(90deg, #28a745, #218838);
   color: #fff;
 }
