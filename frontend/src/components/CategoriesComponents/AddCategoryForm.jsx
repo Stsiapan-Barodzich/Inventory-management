@@ -23,7 +23,7 @@ export default function AddCategoryForm() {
     const newCategory = { name };
 
     try {
-      await authFetch("http://localhost:8000/categories/", {
+      await authFetch("/categories/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

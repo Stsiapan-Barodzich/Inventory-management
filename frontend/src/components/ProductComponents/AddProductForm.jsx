@@ -29,7 +29,7 @@ export default function AddProductForm() {
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const data = await authFetch("http://localhost:8000/categories/");
+        const data = await authFetch("/categories/");
         console.log("Fetched categories:", data);
         setCategories(Array.isArray(data) ? data : []);
       } catch (error) {
