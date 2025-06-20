@@ -145,7 +145,7 @@ export default function EditProductForm() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-success">
             Save
           </button>
         </form>

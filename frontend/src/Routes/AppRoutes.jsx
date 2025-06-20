@@ -19,7 +19,8 @@ import AddProductStockForm from '@components/ProductStockComponents/AddProductSt
 import ProductStockList from '@/components/ProductStockComponents/ProductStockList.jsx';
 import TransferLogList from '@/components/TransferComponents/TransferLogList.jsx';
 import TransferProductForm from '@/components/TransferComponents/TransferProductForm.jsx';
-import AddCategoryForm from '@/components/CategoriesComponents/AddCategoryForm.jsx';
+import EditCategoryForm from '@/components/CategoriesComponents/EditCategoryForm.jsx';
+import CategoryList from '@/components/CategoriesComponents/CategoryList.jsx';
 
 function AppRoutes(){
   return (

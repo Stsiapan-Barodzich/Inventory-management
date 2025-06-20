@@ -125,7 +125,7 @@ export default function AddProductForm() {
             <textarea id="description" {...register("description")} />
           </div>
           <button type="submit" className="btn btn-success">
-            Add
+            Add Product
           </button>
         </form>
       </div>

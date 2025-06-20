@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuthFetch } from "../../hooks/useAuthFetch";
+import { useAuthFetch } from "@hooks/useAuthFetch";
 import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function EditCategoryForm() {
@@ -16,9 +16,7 @@ export default function EditCategoryForm() {
     const fetchCategory = async () => {
       setIsLoading(true);
       try {
-        const response = await authFetch(`http://localhost:8000/categories/${id}/`);
-        console.log("API response:", response); // Отладка
-        // Поддержка разных форматов ответа
+        const response = await authFetch(`/categories/${id}/`);
         const category = response.data || response;
         if (!category || !category.name) {
           throw new Error("Invalid category data");
@@ -47,7 +45,7 @@ export default function EditCategoryForm() {
     const updatedCategory = { name };
 
     try {
-      await authFetch(`http://localhost:8000/categories/${id}/`, {
+      await authFetch(`/categories/${id}/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -56,7 +54,7 @@ export default function EditCategoryForm() {
       });
       setSuccess("Category updated successfully!");
       setTimeout(() => {
-        navigate("/categories"); // Перенаправление на список категорий
+        navigate("/categories"); 
       }, 1000);
     } catch (error) {
       console.error("API error:", error);
@@ -64,6 +62,23 @@ export default function EditCategoryForm() {
         ? Object.values(error.response.data).flat().join(" ")
         : error.message;
       setError(`Failed to update category: ${errorMessage}`);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
+
+    try {
+      await authFetch(`/categories/${id}/`, {
+        method: "DELETE",
+      });
+      setSuccess("Category deleted successfully!");
+      setTimeout(() => {
+        navigate("/categories");
+      }, 1000);
+    } catch (error) {
+      console.error("API error:", error);
+      setError("Failed to delete category");
     }
   };
 
@@ -85,12 +100,17 @@ export default function EditCategoryForm() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="input-field" // Заменил form-control на input-field для консистентности
+                className="input-field" 
               />
             </div>
-            <button type="submit" className="btn btn-success">
-              Update Category
-            </button>
+            <div className="button-group">
+              <button type="submit" className="btn btn-success">
+                Update Category
+              </button>
+              <button type="button" className="btn btn-danger" style={{marginLeft: '10px'}} onClick={handleDelete}>
+                Delete Category
+              </button>
+            </div>
           </form>
         )}
       </div>

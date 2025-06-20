@@ -76,7 +76,7 @@ export default function AddUserForm() {
             />
           </div>
           <button type="submit" className="btn btn-success">
-            Add
+            Add User
           </button>
         </form>
       </div>

@@ -64,6 +64,7 @@ export default function ProductStockList() {
           <button
             type="button"
             className="btn btn-success"
+            style={{height:"55px"}}
             onClick={() => navigate("/add-product-stock")}
           >
             Add Product Stock
@@ -71,6 +72,7 @@ export default function ProductStockList() {
           <button
             type="button"
             className="btn btn-success"
+            style={{height:"55px"}}
             onClick={() => navigate("/transfer")}
           >
             Transfer Product
@@ -78,6 +80,7 @@ export default function ProductStockList() {
           <button
             type="button"
             className="btn btn-success"
+            style={{height:"55px"}}
             onClick={() => navigate("/transfer-logs")}
           >
             View Transfer Logs

@@ -60,20 +60,16 @@ export default function ProductDetail() {
         <p><strong>Category:</strong> {category ? category.name : "No category"}</p>
         <p><strong>Description:</strong> {product.description || "No description"}</p>
         <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <button 
-            className="btn btn-primary" 
-            style={{ marginTop: '20px' }} 
-            onClick={() => navigate(`/products/edit/${id}`)}
-          >
+          <button className="btn btn-primary" style={{ marginTop: '20px', height: '50px' }} onClick={() => navigate("/products")}>
+            ← Product List
+          </button>
+          <button className="btn btn-primary" style={{ marginTop: '20px', height: '50px' }} onClick={() => navigate(`/products/edit/${id}`)}>
             Edit
           </button>
           <button className="btn btn-danger" onClick={handleDelete}>
             Delete
           </button>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate("/products")}>
-          ← Product List
-        </button>
       </div>
     </div>
   );

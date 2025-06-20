@@ -84,7 +84,7 @@ export default function EditUserForm() {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-success">
             Save
           </button>
         </form>

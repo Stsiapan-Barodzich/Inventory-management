@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuthFetch } from "../../hooks/useAuthFetch";
+import { useAuthFetch } from "@hooks/useAuthFetch";
 import AddCategoryForm from "./AddCategoryForm";
 import ErrorMessage from "../SharedComponents/ErrorMessage";
 
@@ -15,7 +15,7 @@ export default function CategoryList() {
     async function fetchData() {
       setIsLoading(true);
       try {
-        const response = await authFetch("http://localhost:8000/categories/");
+        const response = await authFetch("/categories/");
         setCategories(Array.isArray(response.data) ? response.data : Array.isArray(response) ? response : []);
       } catch (error) {
         console.error("Error loading data:", error);
@@ -32,7 +32,7 @@ export default function CategoryList() {
 
   const refreshCategories = async () => {
     try {
-      const response = await authFetch("http://localhost:8000/categories/");
+      const response = await authFetch("/categories/");
       setCategories(Array.isArray(response.data) ? response.data : Array.isArray(response) ? response : []);
     } catch (error) {
       setError("Failed to fetch categories: " + error.message);

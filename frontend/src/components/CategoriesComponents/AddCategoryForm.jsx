@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthFetch } from "../../hooks/useAuthFetch";
+import { useAuthFetch } from "@hooks/useAuthFetch";
 import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function AddCategoryForm({ onSuccess }) {
@@ -33,10 +33,10 @@ export default function AddCategoryForm({ onSuccess }) {
       setSuccess("Category added successfully!");
       setName("");
       if (onSuccess) {
-        onSuccess(); // Закрываем модальное окно
+        onSuccess(); 
       }
       setTimeout(() => {
-        navigate("/product-stocks");
+        navigate("/categories");
       }, 1000);
     } catch (error) {
       console.error("API error:", error);
