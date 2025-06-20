@@ -39,10 +39,10 @@ REST_FRAMEWORK = {
     ],
 }
 SIMPLE_JWT = {
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=int(os.getenv("ACCESS_TOKEN_LIFETIME", "900"))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(seconds=int(os.getenv("REFRESH_TOKEN_LIFETIME", "5184000"))),
+    "ROTATE_REFRESH_TOKENS": os.getenv("ROTATE_REFRESH_TOKENS", "True") == "True",
+    "BLACKLIST_AFTER_ROTATION": os.getenv("BLACKLIST_AFTER_ROTATION", "True") == "True",
 }
 
 MIDDLEWARE = [
