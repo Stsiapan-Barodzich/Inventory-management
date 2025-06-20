@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useAuth } from "../../Contexts/AuthContext";
+import { useAuth } from "@Contexts/AuthContext";
 import { useNavigate } from "react-router-dom"; 
-import styles from "../../Styles/auth.module.css";
+import styles from "@Styles/auth.module.css";
 import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 function Login() {

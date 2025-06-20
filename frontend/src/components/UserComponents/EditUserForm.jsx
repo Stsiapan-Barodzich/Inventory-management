@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuthFetch } from "../../hooks/useAuthFetch";
+import { useAuthFetch } from "@hooks/useAuthFetch";
 import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function EditUserForm() {
@@ -45,11 +45,11 @@ export default function EditUserForm() {
       });
       console.log("Response received:", response);
       setSuccess("User edited successfully!");
-      setError(""); // Сброс ошибки при успехе
-      // Задержка для отображения сообщения
+      setError(""); 
+      
       setTimeout(() => {
         navigate(`/users/${id}`);
-      }, 1000); // Задержка 1 секунда
+      }, 1000); 
     } catch (err) {
       console.error("API error:", err);
       setError("Error updating user: " + err.message);

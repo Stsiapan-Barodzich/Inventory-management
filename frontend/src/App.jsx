@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './Contexts/AuthContext.jsx';
+import { BrowserRouter} from 'react-router-dom';
+import { AuthProvider } from '@Contexts/AuthContext.jsx';
 import AppRoutes from './Routes/AppRoutes.jsx';
 
 
@@ -7,9 +7,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {AppRoutes()}
-        </Routes>
+          <AppRoutes />
       </AuthProvider>
     </BrowserRouter>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../../Styles/auth.module.css';
+import styles from '@Styles/auth.module.css';
 
 const ErrorMessage = ({ message }) => {
   if (!message) return null;
