@@ -5,7 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from main.models import Product, ProductStock, Warehouse
+from main.models import Product, ProductStock, TransferLog, Warehouse
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -36,21 +36,6 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
-class ProductStockReadSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source="product.name", read_only=True)
-
-    class Meta:
-        model = ProductStock
-        fields = ["product_name", "quantity"]
-
-
-class ProductStockSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductStock
-        fields = "__all__"
-        read_only_fields = ["id"]
-
-
 class WarehouseSerializer(serializers.ModelSerializer):
     users = UserSerializer(many=True, read_only=True)
 
@@ -58,6 +43,39 @@ class WarehouseSerializer(serializers.ModelSerializer):
         model = Warehouse
         fields = "__all__"
         read_only_fields = ["id"]
+
+
+class ProductStockReadSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    warehouse = WarehouseSerializer(read_only=True)
+
+    class Meta:
+        model = ProductStock
+        fields = ["id", "product", "warehouse", "quantity"]
+
+
+class ProductStockSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    warehouse = WarehouseSerializer(read_only=True)
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), source="product", write_only=True)
+    warehouse_id = serializers.PrimaryKeyRelatedField(
+        queryset=Warehouse.objects.all(), source="warehouse", write_only=True
+    )
+    quantity = serializers.IntegerField(min_value=1)
+
+    class Meta:
+        model = ProductStock
+        fields = ["id", "product", "warehouse", "product_id", "warehouse_id", "quantity"]
+        read_only_fields = ["id", "product", "warehouse"]
+
+    def validate(self, data: dict[str, Any]) -> Any:
+        user = self.context["request"].user
+        warehouse = data["warehouse"]
+
+        if not user.is_superuser and not warehouse.users.filter(id=user.id).exists():
+            raise serializers.ValidationError("You can add products only to your warehouses.")
+
+        return data
 
 
 class LoginSerializer(serializers.Serializer):
@@ -75,4 +93,44 @@ class LoginSerializer(serializers.Serializer):
             data["user"] = user
         else:
             raise serializers.ValidationError("Both username and password are required.")
+        return data
+
+
+class TransferLogSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+    from_warehouse = WarehouseSerializer(allow_null=True)
+    to_warehouse = WarehouseSerializer()
+    transferred_by = UserSerializer()
+
+    class Meta:
+        model = TransferLog
+        fields = ["id", "product", "from_warehouse", "to_warehouse", "quantity", "transferred_by", "created_at"]
+
+
+class ProductTransferSerializer(serializers.Serializer):
+    product_id = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all())
+    from_warehouse_id = serializers.PrimaryKeyRelatedField(
+        queryset=Warehouse.objects.all(), allow_null=True, required=False
+    )
+    to_warehouse_id = serializers.PrimaryKeyRelatedField(queryset=Warehouse.objects.all())
+    quantity = serializers.IntegerField(min_value=1)
+
+    def validate(self, data: dict[str, Any]) -> Any:
+        user = self.context["request"].user
+        from_warehouse = data.get("from_warehouse_id")
+        to_warehouse = data["to_warehouse_id"]
+        quantity = data["quantity"]
+        product = data["product_id"]
+
+        if not user.is_superuser:
+            if from_warehouse and not from_warehouse.users.filter(id=user.id).exists():
+                raise serializers.ValidationError("You do not have access to the source warehouse.")
+            if not to_warehouse.users.filter(id=user.id).exists():
+                raise serializers.ValidationError("You do not have access to the target warehouse.")
+
+        if from_warehouse:
+            from_stock = ProductStock.objects.filter(product=product, warehouse=from_warehouse).first()
+            if not from_stock or from_stock.quantity < quantity:
+                raise serializers.ValidationError("Insufficient quantity in the source warehouse.")
+
         return data

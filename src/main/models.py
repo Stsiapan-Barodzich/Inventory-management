@@ -36,3 +36,18 @@ class ProductStock(models.Model):
 
     def __str__(self) -> str:
         return f"{self.product.name} - {self.warehouse.name} ({self.quantity})"
+
+
+class TransferLog(models.Model):
+    product = models.ForeignKey("Product", on_delete=models.CASCADE)
+    from_warehouse = models.ForeignKey(
+        "Warehouse", related_name="transfers_from", on_delete=models.CASCADE, null=True, blank=True
+    )
+    to_warehouse = models.ForeignKey("Warehouse", related_name="transfers_to", on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    transferred_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Transfer Log"
+        verbose_name_plural = "Transfer Logs"

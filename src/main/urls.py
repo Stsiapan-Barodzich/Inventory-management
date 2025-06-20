@@ -7,6 +7,7 @@ from main.views import (
     LogoutAPIView,
     ProductStockViewSet,
     ProductViewSet,
+    TransferLogViewSet,
     UserViewSet,
     WarehouseViewSet,
 )
@@ -16,6 +17,7 @@ router.register(r"warehouses", WarehouseViewSet, basename="warehouses")
 router.register(r"products", ProductViewSet, basename="products")
 router.register(r"product-stocks", ProductStockViewSet, basename="product-stocks")
 router.register(r"users", UserViewSet, basename="users")
+router.register(r"transfer-logs", TransferLogViewSet, basename="transfer-logs")
 
 urlpatterns = [
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
