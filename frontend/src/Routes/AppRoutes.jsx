@@ -16,6 +16,10 @@ import UserDetail from '@components/UserComponents/UserDetail.jsx';
 import AddUserForm from '@components/UserComponents/AddUserForm.jsx';
 import EditUserForm from '@components/UserComponents/EditUserForm.jsx';
 import AddProductStockForm from '@components/ProductStockComponents/AddProductStockForm.jsx';
+import ProductStockList from '@/components/ProductStockComponents/ProductStockList.jsx';
+import TransferLogList from '@/components/TransferComponents/TransferLogList.jsx';
+import TransferProductForm from '@/components/TransferComponents/TransferProductForm.jsx';
+import AddCategoryForm from '@/components/CategoriesComponents/AddCategoryForm.jsx';
 
 function AppRoutes(){
   return (

@@ -8,7 +8,7 @@ export default function AddProductStockForm() {
   const [products, setProducts] = useState([]);
   const [selectedWarehouseId, setSelectedWarehouseId] = useState("");
   const [selectedProductId, setSelectedProductId] = useState("");
-  const [quantity, setQuantity] = useState<number>(0);
+  const [quantity, setQuantity] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const authFetch = useAuthFetch();
