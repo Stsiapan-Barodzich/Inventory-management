@@ -44,7 +44,8 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
-    users = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=True, required=False)
+    user_queryset = User.objects.all()
+    users = serializers.PrimaryKeyRelatedField(queryset=user_queryset, many=True, required=False)
 
     class Meta:
         model = Warehouse
