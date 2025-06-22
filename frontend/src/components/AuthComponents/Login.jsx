@@ -66,10 +66,10 @@ function Login() {
           </button>
           <button 
             type="button" 
-            className={styles.submitButton}
+            className="btn btn-register"
             onClick={handleSignUp}
           >
-            Sign Up
+            Create Account
           </button>
         </form>
       </div>

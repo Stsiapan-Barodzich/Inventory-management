@@ -108,7 +108,21 @@ thead {
   transition: background 0.3s ease, transform 0.1s ease;
 
 }
+.btn-register{
+  margin-top: 10px;
+  background: none;
+  border: none;
+  color: #1E90FF; 
+  padding: 0;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
 
+.btn-register:hover
+{
+  color: #104E8B;
+}
 .btn-primary {
   padding: 10px 0px 10px 0px;
   height: 35px;

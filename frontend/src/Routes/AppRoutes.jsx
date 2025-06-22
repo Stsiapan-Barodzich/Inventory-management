@@ -21,13 +21,14 @@ import TransferLogList from '@/components/TransferComponents/TransferLogList.jsx
 import TransferProductForm from '@/components/TransferComponents/TransferProductForm.jsx';
 import EditCategoryForm from '@/components/CategoriesComponents/EditCategoryForm.jsx';
 import CategoryList from '@/components/CategoriesComponents/CategoryList.jsx';
+import Register from '@/components/AuthComponents/Register.jsx';
 
 function AppRoutes(){
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login/" replace />} />
       <Route path="/login/" element={<Login />} />
-      <Route path="/register" element={<AddUserForm />} />
+      <Route path="/register" element={<Register />} />
       <Route path="/logout" element={<Logout />} />
       
       <Route element={<PrivateRoute />}>
