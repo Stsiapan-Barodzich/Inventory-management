@@ -24,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
             "email": {"required": True},
             "username": {"required": True},
         }
-        read_only_fields: list[str] = ["id"]
+        read_only_fields = ["id"]
 
     def validate_password(self, value: Any) -> Any:
         if len(value) < 8:
