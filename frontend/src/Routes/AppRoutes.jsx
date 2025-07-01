@@ -45,5 +45,5 @@ function AppRoutes(){
     </Routes>
   );
 }
-
 export default AppRoutes;
+
