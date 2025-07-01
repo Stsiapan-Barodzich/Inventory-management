@@ -29,12 +29,7 @@ def send_stock_notification(product_stock: ProductStock, recipient_email: Option
         f"Please restock soon!"
     )
     html_message = render_to_string("email_templates/low_stock_alert.html", context)
-
-    if recipient_email:
-        recipients = [recipient_email]
-    else:
-        # recipients = list(product_stock.warehouse.users.all().values_list("email", flat=True))
-        recipients = ["stepanborodic@gmail.com"]
+    recipients = ["stepanborodic@gmail.com"]
 
     if not recipients:
         admin_email = getattr(settings, "ADMIN_EMAIL", None)
