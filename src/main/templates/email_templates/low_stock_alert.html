@@ -1,0 +1,33 @@
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; }
+        .alert { border-left: 4px solid #ff9800; padding: 1em; background: #fff8e1; }
+        h2 { color: #d32f2f; }
+        .product { font-weight: bold; color: #1976d2; }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="alert">
+        <h2>Low Stock Alert!</h2>
+        <p>
+            Product: <span class="product">{{ product.name }}</span><br>
+            Warehouse: {{ warehouse.name }}<br>
+            Current quantity: <strong>{{ quantity }}</strong> (minimum: {{ threshold }})
+        </p>
+
+        <p>Please restock this product as soon as possible.</p>
+
+        <p style="margin-top: 20px; font-size: 0.9em; color: #757575;">
+            This is an automated message. Please do not reply directly.
+        </p>
+    </div>
+</body>
+</html>

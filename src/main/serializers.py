@@ -24,7 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
             "email": {"required": True},
             "username": {"required": True},
         }
-        read_only_fields: list[str] = ["id"]
+        read_only_fields = ["id"]
 
     def validate_password(self, value: Any) -> Any:
         if len(value) < 8:
@@ -44,12 +44,18 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
-    users = UserSerializer(many=True, read_only=True)
+    user_queryset = User.objects.all()
+    users = serializers.PrimaryKeyRelatedField(queryset=user_queryset, many=True, required=False)
 
     class Meta:
         model = Warehouse
-        fields = "__all__"
+        fields = ["id", "name", "location", "users"]
         read_only_fields = ["id"]
+
+    def to_representation(self, instance: Warehouse) -> dict[str, Any]:
+        representation = super().to_representation(instance)
+        representation["users"] = UserSerializer(instance.users.all(), many=True).data
+        return representation
 
 
 class ProductStockReadSerializer(serializers.ModelSerializer):

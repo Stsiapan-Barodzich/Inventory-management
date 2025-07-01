@@ -1,3 +1,4 @@
+import logging
 from typing import Sequence, cast
 
 from django.contrib.auth.models import User
@@ -25,6 +26,9 @@ from main.serializers import (
     UserSerializer,
     WarehouseSerializer,
 )
+from main.services.email import send_stock_notification
+
+logger = logging.getLogger(__name__)
 
 
 class WarehouseViewSet(ModelViewSet):
@@ -115,6 +119,7 @@ class ProductStockViewSet(ModelViewSet):
         if existing:
             existing.quantity += quantity
             existing.save()
+            send_stock_notification(existing)
             TransferLog.objects.create(
                 product=product,
                 from_warehouse=None,
@@ -123,7 +128,8 @@ class ProductStockViewSet(ModelViewSet):
                 transferred_by=user,
             )
         else:
-            serializer.save()
+            product_stock = serializer.save()
+            send_stock_notification(product_stock)
             TransferLog.objects.create(
                 product=product,
                 from_warehouse=None,
@@ -185,13 +191,16 @@ class ProductStockViewSet(ModelViewSet):
             from_stock.delete()
         else:
             from_stock.save()
+            send_stock_notification(from_stock)
 
         to_stock = ProductStock.objects.filter(product=product, warehouse=to_warehouse).first()
         if to_stock:
             to_stock.quantity += quantity
             to_stock.save()
+            send_stock_notification(to_stock)
         else:
-            ProductStock.objects.create(product=product, warehouse=to_warehouse, quantity=quantity)
+            to_stock = ProductStock.objects.create(product=product, warehouse=to_warehouse, quantity=quantity)
+            send_stock_notification(to_stock)
 
         TransferLog.objects.create(
             product=product,
