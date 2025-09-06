@@ -1,36 +1,64 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuthFetch } from "@hooks/useAuthFetch";
+import ErrorMessage from "../SharedComponents/ErrorMessage";
 
 export default function UserDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
+
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:8000/users/${id}/`)
-      .then(res => res.json())
-      .then(data => setUser(data));
-  }, [id]);
+    authFetch(`http://localhost:8000/users/${id}/`)
+      .then((data) => {
+        setUser(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error loading user:", err);
+        setError("Error loading user");
+        navigate("/users");
+      });
+  }, [id, authFetch, navigate]);
 
   const handleDelete = async () => {
-    const res = await fetch(`http://localhost:8000/users/${id}/`, {
-      method: "DELETE"
-    });
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
 
-    if (res.ok) {
-      alert("Пользователь удалён");
+    try {
+      await authFetch(`http://localhost:8000/users/${id}/`, {
+        method: "DELETE",
+      });
+      setError(""); // Сброс ошибки при успехе
       navigate("/users");
+    } catch (err) {
+      setError("Error deleting user: " + err.message);
     }
   };
 
-  if (!user) return <div>Загрузка...</div>;
+  if (loading) return <div className="container fade-in">Loading...</div>;
 
   return (
-    <div>
-      <h2>{user.username}</h2>
-      <p>Email: {user.email}</p>
-      <button onClick={() => navigate(`/users/${id}/edit`)}>Редактировать</button>
-      <button onClick={handleDelete}>Удалить</button>
+    <div className="container fade-in">
+      {error && <ErrorMessage message={error} />}
+      <div className="card">
+        <h2>{user.username}</h2>
+        <p><strong>Email:</strong> {user.email}</p>
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <button className="btn btn-primary" onClick={() => navigate(`/users/edit/${id}`)}>
+            Edit
+          </button>
+          <button className="btn btn-danger" onClick={handleDelete}>
+            Delete
+          </button>
+        </div>
+        <button className="btn btn-primary" onClick={() => navigate("/users")}>
+          ← User List
+        </button>
+      </div>
     </div>
   );
 }
