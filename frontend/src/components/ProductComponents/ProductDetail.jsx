@@ -12,7 +12,7 @@ export default function ProductDetail() {
   
 
   useEffect(() => {
-    authFetch(`http://localhost:8000/products/${id}/`)
+    authFetch(`/products/${id}/`)
       .then((data) => {
         setProduct(data);
       })
@@ -25,7 +25,7 @@ export default function ProductDetail() {
   const handleDelete = () => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
-    authFetch(`http://localhost:8000/products/${id}/`, { method: "DELETE" })
+    authFetch(`/products/${id}/`, { method: "DELETE" })
       .then(() => {
         setError(""); 
         navigate("/products");

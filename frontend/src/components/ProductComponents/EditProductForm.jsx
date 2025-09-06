@@ -16,7 +16,7 @@ export default function EditProductForm() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    authFetch(`http://localhost:8000/products/${id}/`)
+    authFetch(`/products/${id}/`)
       .then((data) => {
         setName(data.name);
         setPrice(data.price);
@@ -41,7 +41,7 @@ export default function EditProductForm() {
     };
 
     try {
-      await authFetch(`http://localhost:8000/products/${id}/`, {
+      await authFetch(`/products/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

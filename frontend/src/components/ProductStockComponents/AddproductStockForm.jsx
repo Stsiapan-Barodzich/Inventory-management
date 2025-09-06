@@ -6,9 +6,10 @@ import ErrorMessage from "../SharedComponents/ErrorMessage";
 export default function AddProductStockForm() {
   const [warehouses, setWarehouses] = useState([]);
   const [products, setProducts] = useState([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState("");
-  const [quantity, setQuantity] = useState("");
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const authFetch = useAuthFetch();
   const [error, setError] = useState("");
@@ -17,15 +18,20 @@ export default function AddProductStockForm() {
   useEffect(() => {
     async function fetchData() {
       try {
+        setIsLoading(true);
         const [warehousesData, productsData] = await Promise.all([
-          authFetch("http://localhost:8000/warehouses/"),
-          authFetch("http://localhost:8000/products/"),
+          authFetch("/warehouses/"),
+          authFetch("/products/"),
         ]);
-        setWarehouses(warehousesData);
-        setProducts(productsData);
+        setWarehouses(Array.isArray(warehousesData) ? warehousesData : []);
+        setProducts(Array.isArray(productsData) ? productsData : []);
       } catch (error) {
         setError("Failed to load data: " + error.message);
         console.error("Fetch error:", error);
+        setWarehouses([]);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchData();
@@ -33,56 +39,78 @@ export default function AddProductStockForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); 
-    setSuccess(""); 
-    console.log("Submitting:", { selectedWarehouse, selectedProduct, quantity });
+    setError("");
+    setSuccess("");
 
-    if (!selectedWarehouse || !selectedProduct || !quantity) {
+    if (!selectedWarehouseId || !selectedProductId || !quantity) {
       setError("Please fill in all fields");
-      console.log("Validation failed");
+      return;
+    }
+
+    const quantityNum = Number(quantity);
+    if (quantityNum <= 0) {
+      setError("Quantity must be positive");
       return;
     }
 
     const newStock = {
-      warehouse: selectedWarehouse,
-      product: selectedProduct,
-      quantity: Number(quantity),
+      product_id: Number(selectedProductId),
+      warehouse_id: Number(selectedWarehouseId),
+      quantity: quantityNum,
     };
 
     try {
-      console.log("Sending request with:", newStock);
-      const response = await authFetch("http://localhost:8000/product-stocks/", {
+      const response = await authFetch("/product-stocks/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(newStock),
       });
-      setSuccess("Product stock added successfully!"); 
-      
+      setSuccess("Product stock added successfully!");
       setTimeout(() => {
         navigate("/product-stocks");
-      }, 1000); 
+      }, 1000);
     } catch (error) {
       console.error("API error:", error);
-      setError("Failed to add product stock: " + error.message);
+      const errorMessage = error.response?.data
+        ? Object.values(error.response.data).flat().join(" ")
+        : error.message;
+      setError("Failed to add product stock: " + errorMessage);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="container fade-in">
+        <div className="card">
+          <p>Loading warehouses and products...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container fade-in">
       {error && <ErrorMessage message={error} />}
-      {success && <ErrorMessage message={success} />}
+      {success && (
+        <div className="success-message" style={{ color: "green", marginBottom: "10px" }}>
+          {success}
+        </div>
+      )}
       <div className="card">
         <h2>Add Product Stock</h2>
+        {warehouses.length === 0 && <p>No warehouses available.</p>}
+        {products.length === 0 && <p>No products available.</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="warehouse">Warehouse:</label>
             <select
               id="warehouse"
-              value={selectedWarehouse}
-              onChange={(e) => setSelectedWarehouse(e.target.value)}
+              value={selectedWarehouseId}
+              onChange={(e) => setSelectedWarehouseId(e.target.value)}
               required
+              disabled={warehouses.length === 0}
             >
               <option value="">-- Choose a warehouse --</option>
               {warehouses.map((w) => (
@@ -96,9 +124,10 @@ export default function AddProductStockForm() {
             <label htmlFor="product">Product:</label>
             <select
               id="product"
-              value={selectedProduct}
-              onChange={(e) => setSelectedProduct(e.target.value)}
+              value={selectedProductId}
+              onChange={(e) => setSelectedProductId(e.target.value)}
               required
+              disabled={products.length === 0}
             >
               <option value="">-- Choose a product --</option>
               {products.map((p) => (
@@ -113,13 +142,17 @@ export default function AddProductStockForm() {
             <input
               type="number"
               id="quantity"
-              min="0"
+              min="1"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               required
             />
           </div>
-          <button type="submit" className="btn btn-success">
+          <button
+            type="submit"
+            className="btn btn-success"
+            disabled={warehouses.length === 0 || products.length === 0}
+          >
             Add Product Stock
           </button>
         </form>

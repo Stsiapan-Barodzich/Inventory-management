@@ -21,7 +21,7 @@ export default function AddUserForm() {
     const newUser = { username, email, password };
 
     try {
-      await authFetch("http://localhost:8000/users/", {
+      await authFetch("/users/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -32,7 +32,7 @@ export default function AddUserForm() {
       setSuccess("User added successfully!");
       setTimeout(() => {
         navigate("/users");
-      }, 1000); // Задержка 1 секунда
+      }, 1000); 
     } catch (error) {
       setError("Error while adding user: " + error.message);
     }

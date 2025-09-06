@@ -33,7 +33,7 @@ export default function AddProductForm() {
     };
 
     try {
-      await authFetch("http://localhost:8000/products/", {
+      await authFetch("/products/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

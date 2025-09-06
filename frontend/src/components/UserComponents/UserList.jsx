@@ -7,7 +7,7 @@ export default function UserList() {
   const authFetch = useAuthFetch();
 
   useEffect(() => {
-    authFetch("http://localhost:8000/users/")
+    authFetch("/users/")
       .then(setUsers)
   }, [authFetch]);
 

@@ -39,7 +39,10 @@ function AppRoutes(){
           <Route path="/users/:id" element={<UserDetail />} />
           <Route path="/users/add" element={<AddUserForm />} />
           <Route path="/users/edit/:id" element={<EditUserForm />} />
-          <Route path="/product-stocks" element={<AddProductStockForm />} />
+          <Route path="/product-stocks" element={<ProductStockList />} />
+          <Route path="/add-product-stock" element={<AddProductStockForm />} />
+          <Route path="/transfer" element={<TransferProductForm />} />
+          <Route path="/transfer-logs" element={<TransferLogList />} />
         </Route>
       </Route>
     </Routes>
